@@ -219,7 +219,7 @@ stream = api.agent.invokeAgentApi({
 3. 回读确认表标识与字段都没变；
 4. **用两个真实账号验收**——单账号试运行、在请求里换一个 `actor.id`，都不能证明平台的调用者隔离已经解除。
 
-本项目只把 `rhythm_score` 从 `1` 改成 `3`，回读保留全部 14 个业务字段，修复后多账号历史成绩在同一榜单中可见。完整步骤（含备份脚本、回读核对、跨账号验收清单）整理在 [docs/lingzhu-leaderboard-rw-mode.md](docs/lingzhu-leaderboard-rw-mode.md)，可以直接给其他 AIUI 项目复用。
+本项目只把 `rhythm_score` 从 `1` 改成 `3`，回读保留全部 14 个业务字段，修复后多账号历史成绩在同一榜单中可见。完整步骤（含备份脚本、回读核对、跨账号验收清单）整理在 [docs/lingzhu-leaderboard-rw-mode.md](docs/lingzhu-leaderboard-rw-mode.md)，可以直接给其他 AIUI 项目复用；这套接线与排障流程也整理成了可直接调用的技能 [rokid-lingzhu-backend](https://github.com/sengmitnick/rokid-lingzhu-backend)。
 
 ### 3.6 信任边界：排行榜能排，不代表分数可信
 
@@ -359,6 +359,7 @@ docs/       验证记录、rw_mode 指南、预览素材
 ```
 
 - 仓库：[https://github.com/sengmitnick/rhythm-jump](https://github.com/sengmitnick/rhythm-jump)
+- 配套技能：[rokid-lingzhu-backend](https://github.com/sengmitnick/rokid-lingzhu-backend) —— 灵珠后端接线、流式回包排障与跨账号共享榜单的 Codex skill
 - 原创代码：[MIT License](LICENSE)
 - 第三方素材：[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
 - 验证记录：[docs/validation.md](docs/validation.md)

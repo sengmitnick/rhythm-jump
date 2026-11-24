@@ -9,6 +9,7 @@
   },
   "scripts": {
     "config:init": "node tools/init-service-config.js",
+    "docs:html": "node tools/build-article-html.mjs",
     "test": "npm run config:init && node --test tests/*.test.js",
     "pack": "npm run config:init && node -e \"require('node:fs').mkdirSync('output',{recursive:true})\" && aix pack src -o output/rhythm-jump.aix -O",
     "preview": "npm run config:init && aix preview src --dev",

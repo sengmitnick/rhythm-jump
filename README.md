@@ -89,9 +89,10 @@ docs/                 征文、排行榜经验与界面材料
 
 ## 文档
 
-- [AIUI 征文：从眼镜 IMU 到全身体感节奏游戏](docs/aiui-contest-rhythm-jump.md)
+- [AIUI 征文：灵珠做后端 + IMU 做输入](docs/aiui-contest-rhythm-jump.md)（[网页版](docs/aiui-contest-rhythm-jump.html)，`npm run docs:html` 重新生成）
 - [公开快照验证记录](docs/validation.md)
 - [灵珠排行榜接入](backend/v1/README.md)
+- 配套技能：[rokid-lingzhu-backend](https://github.com/sengmitnick/rokid-lingzhu-backend) —— 把灵珠后端接线、流式回包排障和跨账号共享榜单整理成了可直接调用的 Codex skill
 - [共享排行榜 rw_mode 设置与跨账号验收](docs/lingzhu-leaderboard-rw-mode.md)
 - [第三方素材与许可](THIRD_PARTY_NOTICES.md)
 

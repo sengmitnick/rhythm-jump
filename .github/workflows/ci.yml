@@ -24,6 +24,8 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run test:all
+      - run: npm run docs:html
+      - run: git diff --exit-code -- docs/aiui-contest-rhythm-jump.html docs/index.html
       - run: npm run pack
       - uses: actions/upload-artifact@v4
         with:
