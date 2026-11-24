@@ -1,0 +1,22 @@
+{
+  "name": "rhythm-jump",
+  "version": "0.1.0",
+  "description": "An AIUI full-body rhythm game for Rokid AI glasses",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "config:init": "node tools/init-service-config.js",
+    "test": "npm run config:init && node --test tests/*.test.js",
+    "pack": "npm run config:init && node -e \"require('node:fs').mkdirSync('output',{recursive:true})\" && aix pack src -o output/rhythm-jump.aix -O",
+    "preview": "npm run config:init && aix preview src --dev",
+    "check": "npm run config:init && node tools/check-project.js",
+    "test:backend": "PYTHONPATH=. python3 -m unittest backend.v1.tests.test_contract -v",
+    "test:all": "npm test && npm run test:backend"
+  },
+  "devDependencies": {
+    "@yodaos-pkg/aix-cli": "0.10.1"
+  }
+}

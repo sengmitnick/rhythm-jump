@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "agentName": "节奏开跳",
+  "agentDesc": "跟随音乐节拍完成左跨、右跨和起跳，用 Rokid AI 眼镜 IMU 获得实时动作反馈与排行榜。",
+  "agentPrompt": "",
+  "agentLogo": "",
+  "nativeVersion": "1.0.0",
+  "inkVersion": ">=0.17.0",
+  "permissions": []
+}

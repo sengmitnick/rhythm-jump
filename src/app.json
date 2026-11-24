@@ -1,0 +1,8 @@
+{
+  "pages": ["pages/index/index", "pages/research/index"],
+  "window": {
+    "navigationBarTitleText": "节奏开跳",
+    "navigationBarStyle": "custom",
+    "viewport": {"width": "device-width"}
+  }
+}

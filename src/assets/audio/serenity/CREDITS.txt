@@ -1,0 +1,25 @@
+OutFox Serenity v2.5 audio and dance-single Beginner stepcharts
+Source release: https://github.com/TeamRizu/OutFox-Serenity/releases/tag/v2.5
+Source revision: 8eba95639e5b3f789c7cd5c923080f43cf792907
+
+All three stepcharts are by Daniel Rotwind and licensed under CC BY 4.0.
+Chart license: https://creativecommons.org/licenses/by/4.0/
+OutFox chart submission terms: https://projectoutfox.com/outfox-serenity/outfox-serenity-templates
+Changes to charts: SSC translated to timed left, jump (up) and right cues; down omitted.
+Changes to recordings: converted from Opus to 64 kbps MP3; an 8-second, 48 kbps MP3 excerpt is used in song select.
+Each packaged recording and its excerpt are provided under the same license as the source recording.
+
+Beatucada — Kurio Prokos (CC BY-SA 4.0)
+Recording license: https://creativecommons.org/licenses/by-sa/4.0/
+Source credits: https://github.com/TeamRizu/OutFox-Serenity/blob/8eba95639e5b3f789c7cd5c923080f43cf792907/OutFox%20Serenity%20Volume%202/Kurio%20Prokos%20-%20Beatucada/credits.txt
+Preview start in original recording: 39.344 seconds
+
+Into My Dream — Lagoona / Andreas Viklund (CC BY 4.0)
+Recording license: https://creativecommons.org/licenses/by/4.0/
+Source credits: https://github.com/TeamRizu/OutFox-Serenity/blob/8eba95639e5b3f789c7cd5c923080f43cf792907/OutFox%20Serenity%20Volume%202/Lagoona%20-%20Into%20My%20Dream/credits.txt
+Preview start in original recording: 27.429 seconds
+
+Summer Overload! — © 2022 Akako Hinami (CC BY-SA 4.0)
+Recording license: https://creativecommons.org/licenses/by-sa/4.0/
+Source credits: https://github.com/TeamRizu/OutFox-Serenity/blob/8eba95639e5b3f789c7cd5c923080f43cf792907/OutFox%20Serenity%20Volume%202.5/Akako%20Hinami%20-%20Summer%20Overload/license.txt
+Preview start in original recording: 106.667 seconds

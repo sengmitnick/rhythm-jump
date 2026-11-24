@@ -1,0 +1,25 @@
+table,field,type,required,description
+rhythm_user,id,Integer,是,平台系统字段：主键（勿改）
+rhythm_user,uuid,String,是,平台系统字段：唯一标识（勿改）
+rhythm_user,bstudio_create_time,Time,是,平台系统字段：插入时间（勿改）
+rhythm_user,user_id,String,是,账号稳定标识；来自 getProfile().accountId
+rhythm_user,display_name,String,是,展示名；1–24 字
+rhythm_user,created_at,Integer,是,首次写入的毫秒时间戳
+rhythm_user,updated_at,Integer,是,最近更新的毫秒时间戳
+rhythm_score,id,Integer,是,平台系统字段：主键（勿改）
+rhythm_score,uuid,String,是,平台系统字段：唯一标识（勿改）
+rhythm_score,bstudio_create_time,Time,是,平台系统字段：插入时间（勿改）
+rhythm_score,run_id,String,是,客户端生成的单局 ID；重试复用
+rhythm_score,user_id,String,是,账号稳定标识
+rhythm_score,display_name,String,是,提交时的展示名快照
+rhythm_score,song_id,String,是,曲目 ID，例如 party-full
+rhythm_score,song_title,String,是,提交时的曲名快照
+rhythm_score,chart_version,Integer,是,谱面版本；换谱后旧分不混榜
+rhythm_score,score,Integer,是,客户端上报总分
+rhythm_score,accuracy,Integer,是,服务端按 perfect/good 计算的准确率
+rhythm_score,max_combo,Integer,是,最高连击
+rhythm_score,perfect,Integer,是,Perfect 数
+rhythm_score,good,Integer,是,Good 数
+rhythm_score,miss,Integer,是,Miss 数
+rhythm_score,played_at,Integer,是,服务端接收结算的毫秒时间戳；同分先达成者优先
+rhythm_score,score_basis,String,是,固定 client_reported
