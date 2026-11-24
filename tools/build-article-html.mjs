@@ -1,5 +1,5 @@
 // Dependency-free Markdown -> single-file HTML for the contest article.
-// Handles the subset used by docs/aiui-contest-rhythm-jump.md so the page can be
+// Handles the subset used by docs/aiui-contest-lingzhu-leaderboard.md so the page can be
 // published as-is (GitHub Pages, forum preview) without a build toolchain.
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -8,8 +8,8 @@ import { fileURLToPath } from 'node:url';
 const BT = String.fromCharCode(96);
 const FENCE = BT + BT + BT;
 const root = fileURLToPath(new URL('..', import.meta.url));
-const source = path.join(root, 'docs', 'aiui-contest-rhythm-jump.md');
-const target = path.join(root, 'docs', 'aiui-contest-rhythm-jump.html');
+const source = path.join(root, 'docs', 'aiui-contest-lingzhu-leaderboard.md');
+const target = path.join(root, 'docs', 'aiui-contest-lingzhu-leaderboard.html');
 
 const escapeHtml = text => text
   .replace(/&/g, '&amp;')

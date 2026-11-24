@@ -70,33 +70,26 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
 <div class="layout">
   <nav class="toc" aria-label="目录">
     <strong>目录</strong>
-    <a class="lv2" href="#一-先说结论-两个核心分别解决了什么">一、先说结论：两个核心分别解决了什么</a>
-    <a class="lv2" href="#二-核心一-把头部-imu-变成节奏输入">二、核心一：把头部 IMU 变成节奏输入</a>
-    <a class="lv3" href="#2-1-为什么只保留三个动作">2.1 为什么只保留三个动作</a>
-    <a class="lv3" href="#2-2-先建坐标系-再谈识别">2.2 先建坐标系，再谈识别</a>
-    <a class="lv3" href="#2-3-校准不是-读一帧">2.3 校准不是「读一帧」</a>
-    <a class="lv3" href="#2-4-左右跨-要的是-一次动作-不是-当前位置">2.4 左右跨：要的是「一次动作」，不是「当前位置」</a>
-    <a class="lv3" href="#2-5-起跳-用失重-不用积分高度">2.5 起跳：用失重，不用积分高度</a>
-    <a class="lv3" href="#2-6-判定窗口-以及它不代表什么">2.6 判定窗口，以及它不代表什么</a>
-    <a class="lv2" href="#三-核心二-用灵珠做后端-做出跨账号排行榜">三、核心二：用灵珠做后端，做出跨账号排行榜</a>
-    <a class="lv3" href="#3-1-数据模型-两张表-一次结算一行">3.1 数据模型：两张表，一次结算一行</a>
-    <a class="lv3" href="#3-2-工作流-校验在前-查询在后-包装统一">3.2 工作流：校验在前，查询在后，包装统一</a>
-    <a class="lv3" href="#3-3-协议-一个自描述的-json-信封">3.3 协议：一个自描述的 JSON 信封</a>
-    <a class="lv3" href="#3-4-客户端-流式回包比文档更难伺候">3.4 客户端：流式回包比文档更难伺候</a>
-    <a class="lv3" href="#3-5-踩得最疼的一坑-rw-mode">3.5 踩得最疼的一坑：<code>rw_mode</code></a>
-    <a class="lv3" href="#3-6-信任边界-排行榜能排-不代表分数可信">3.6 信任边界：排行榜能排，不代表分数可信</a>
-    <a class="lv2" href="#四-两个核心怎么接起来">四、两个核心怎么接起来</a>
-    <a class="lv3" href="#4-1-本地永远优先">4.1 本地永远优先</a>
-    <a class="lv3" href="#4-2-离线是默认状态-不是异常状态">4.2 离线是默认状态，不是异常状态</a>
-    <a class="lv3" href="#4-3-状态机把两个核心隔开">4.3 状态机把两个核心隔开</a>
-    <a class="lv2" href="#五-智能体-id-不进仓库-示例配置-本地忽略">五、智能体 ID 不进仓库：示例配置 + 本地忽略</a>
-    <a class="lv2" href="#六-交互与界面">六、交互与界面</a>
-    <a class="lv2" href="#七-验证-把三类证据分开说">七、验证：把三类证据分开说</a>
-    <a class="lv3" href="#7-1-自动化测试-可重复">7.1 自动化测试（可重复）</a>
-    <a class="lv3" href="#7-2-studio-预览-可检查">7.2 Studio 预览（可检查）</a>
-    <a class="lv3" href="#7-3-真机-本次未新增">7.3 真机（本次未新增）</a>
-    <a class="lv2" href="#八-复盘">八、复盘</a>
-    <a class="lv2" href="#九-开源与素材说明">九、开源与素材说明</a>
+    <a class="lv2" href="#一-先把需求翻译成后端契约">一、先把需求翻译成后端契约</a>
+    <a class="lv2" href="#二-为什么用灵珠-而不是自建服务">二、为什么用灵珠，而不是自建服务</a>
+    <a class="lv2" href="#三-数据建模">三、数据建模</a>
+    <a class="lv2" href="#四-工作流-校验在前-查询在后-包装统一">四、工作流：校验在前，查询在后，包装统一</a>
+    <a class="lv3" href="#4-1-代码-a-到底校验什么">4.1 代码 A 到底校验什么</a>
+    <a class="lv3" href="#4-2-代码-b-榜单是在-窗口内-算的">4.2 代码 B：榜单是在「窗口内」算的</a>
+    <a class="lv2" href="#五-协议-一个小而完整的信封">五、协议：一个小而完整的信封</a>
+    <a class="lv2" href="#六-aix-客户端-流式回包比文档难伺候">六、AIX 客户端：流式回包比文档难伺候</a>
+    <a class="lv2" href="#七-最疼的坑-rw-mode">七、最疼的坑：<code>rw_mode</code></a>
+    <a class="lv3" href="#7-1-现象">7.1 现象</a>
+    <a class="lv3" href="#7-2-原因">7.2 原因</a>
+    <a class="lv3" href="#7-3-修改纪律">7.3 修改纪律</a>
+    <a class="lv2" href="#八-信任边界-能排名-不代表分数可信">八、信任边界：能排名，不代表分数可信</a>
+    <a class="lv2" href="#九-智能体-id-不进仓库">九、智能体 ID 不进仓库</a>
+    <a class="lv2" href="#十-验证-哪些是自动化的-哪些还没做">十、验证：哪些是自动化的，哪些还没做</a>
+    <a class="lv3" href="#10-1-可重复的部分">10.1 可重复的部分</a>
+    <a class="lv3" href="#10-2-还不能声称的">10.2 还不能声称的</a>
+    <a class="lv2" href="#十一-想在自己的-aiui-项目里复用-照着这张清单做">十一、想在自己的 AIUI 项目里复用，照着这张清单做</a>
+    <a class="lv2" href="#十二-复盘">十二、复盘</a>
+    <a class="lv2" href="#十三-开源与素材">十三、开源与素材</a>
     <a class="lv2" href="#作者提交前核对项">作者提交前核对项</a>
   </nav>
   <article>
@@ -106,71 +99,37 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
       <a class="pill" href="https://github.com/sengmitnick/rhythm-jump">源码仓库</a>
       <a class="pill" href="https://github.com/sengmitnick/rokid-lingzhu-backend">灵珠后端技能</a>
     </div>
-    <h1>用灵珠做后端、用 IMU 做输入：AIUI 体感游戏「节奏开跳」开源实践</h1>
-<blockquote><p>征文活动：<a href="https://forum.rokid.com/post/detail/3911">AIUI 十二月征文计划</a></p><p>开源仓库：<a href="https://github.com/sengmitnick/rhythm-jump">https://github.com/sengmitnick/rhythm-jump</a></p><p>智能体名称：节奏开跳　｜　AIUI ID：【真实 AIUI ID】　｜　上架状态：【未提交 / 审核中 / 已上架，附真实链接】</p></blockquote>
-<p>「节奏开跳」是一款运行在 Rokid AI 眼镜上的体感节奏游戏：玩家不做任何手柄操作，跟着音乐和迎面而来的空间箭头完成<strong>左跨、右跨、原地起跳</strong>，眼镜 IMU 负责判断动作和时机，画面、声音、分数与排行榜给出即时反馈。</p>
-<p>这篇文章只讲两个核心：</p>
-<ol><li><strong>怎么用灵珠（Lingzhu）当后端，做出一个真正跨账号共享的排行榜；</strong></li><li><strong>怎么把头部单点 IMU 变成可玩、可解释的体感输入。</strong></li></ol>
-<p>其余属于支撑部分，源码里都有。文章里出现的每个结论，都标明了它是「自动化测试」「Studio 预览」还是「真机证据」。</p>
+    <h1>用灵珠工作流当 AIUI 应用的后端：跨账号共享排行榜实战</h1>
+<blockquote><p>征文活动：<a href="https://forum.rokid.com/post/detail/3911">AIUI 十二月征文计划</a></p><p>开源仓库：<a href="https://github.com/sengmitnick/rhythm-jump">https://github.com/sengmitnick/rhythm-jump</a></p><p>配套技能：<a href="https://github.com/sengmitnick/rokid-lingzhu-backend">rokid-lingzhu-backend</a></p><p>智能体名称：节奏开跳　｜　AIUI ID：【真实 AIUI ID】　｜　上架状态：【未提交 / 审核中 / 已上架，附真实链接】</p></blockquote>
+<p>AIUI 应用没有自带服务器。一旦需求从「本机跑起来」变成「把成绩存到云上、按账号排名、换个人登录还能看到别人的分」，就必须有后端。</p>
+<p>这篇文章只讲一件事：<strong>怎么用灵珠（数据表 + 工作流 + API 智能体）把一个跨账号共享排行榜做完，并且踩过的坑都写清楚。</strong></p>
+<p>示例项目是体感节奏游戏「节奏开跳」——但游戏本身怎么判定动作不在本文范围，这里只把它当成一个「每局结束时产出一条成绩」的客户端。换个应用，只要你的服务端契约同样是「提交一条成绩 / 读一个榜」，这套做法可以直接搬走。</p>
+<p><img alt="排行榜页面：读取中、正常榜单、未配置离线态与结算名次（测试数据）" src="images/leaderboard.png" loading="lazy"></p>
 <hr>
-<h2 id="一-先说结论-两个核心分别解决了什么">一、先说结论：两个核心分别解决了什么</h2>
-<div class="table-wrap"><table><thead><tr><th>核心</th><th>要解决的问题</th><th>本项目给出的答案</th></tr></thead><tbody><tr><td>灵珠做后端</td><td>AIUI 应用没有自带服务器，成绩想跨账号比较就必须有云端存储和查询</td><td>灵珠数据表存成绩，工作流做校验/去重/排名，AIX 通过 <code>api.agent.invokeAgentApi</code> 以流式协议调用</td></tr><tr><td>IMU 做输入</td><td>眼镜只有一个头部传感器，看不到手脚</td><td>不追求全身追踪，只把「重心横向移动」和「失重起跳」两类头部可观测信号设计成玩法</td></tr></tbody></table></div>
-<p>这两个核心共享一条铁律：<strong>能观测到什么，就只承诺什么。</strong> 排行榜不假装分数可信，体感不假装肢体被追踪。</p>
-<hr>
-<h2 id="二-核心一-把头部-imu-变成节奏输入">二、核心一：把头部 IMU 变成节奏输入</h2>
-<h3 id="2-1-为什么只保留三个动作">2.1 为什么只保留三个动作</h3>
-<p>头部单点 IMU 能稳定观察到的是「整个身体重心变化传到头部的运动」，而不是四肢位置。手臂挥动、脚步落地在头部信号里往往很弱，甚至被走路、说话、扶眼镜淹没。</p>
-<p>所以玩法只保留三个动作，它们都有清晰的头部特征：</p>
-<ul><li><strong>左跨 / 右跨</strong>：横向加速度出现方向明确的一次推进并回稳；</li><li><strong>原地起跳</strong>：合加速度出现短暂失重，随后落地冲击。</li></ul>
-<p>下蹲等动作在早期实现里做过，但可观测性和可玩性都不如这三个，最终从谱面和绘制中一起关掉。<strong>动作设计本身就是传感器可观测性设计。</strong></p>
-<h3 id="2-2-先建坐标系-再谈识别">2.2 先建坐标系，再谈识别</h3>
-<p>原始加速度是设备坐标系的读数。玩家站着不动时重力方向的分布，会因为佩戴角度、抬头低头而完全不同。直接拿 <code>accel.x</code> 判断左右，换个人就会失效。</p>
-<p><a href="src/lib/body-state.js">src/lib/body-state.js</a> 的做法是：站稳平视时采一次基准四元数，把世界重力旋转到该姿态，得到「世界上方向」；再用基准姿态下的设备 X 轴投影到水平面，得到「世界右方向」。</p>
-<pre class="code lang-js"><code>this.lateralAccel = dot(acceleration, this.worldRight);
-const neckOffset = dot(
-  rotateVectorByQuaternion(NECK_TO_SENSOR, quaternion),
-  this.worldRight
-);</code></pre>
-<p>这一步之后，所有判断都发生在与佩戴姿势无关的坐标系里。</p>
-<h3 id="2-3-校准不是-读一帧">2.3 校准不是「读一帧」</h3>
-<p>校准阶段需要的是<strong>新鲜的加速度与四元数配对</strong>，并检查：</p>
-<ul><li>眼镜是否处于合理佩戴方向（倒置读数要被拒绝）；</li><li>玩家是否站稳（静止噪声要足够小）；</li><li>数据是否连续到达，是否发生断流；</li><li>复用旧基准时，新读数是否仍接近旧姿态。</li></ul>
-<p>姿态明显变化、运动中传感器断流、应用退到后台，都会让旧基准失效。项目里有专门的测试覆盖「眼镜倒置后重新戴正能恢复」「校准复用需要新的配对数据」「最后一帧没有新数据要作废基准」。</p>
-<h3 id="2-4-左右跨-要的是-一次动作-不是-当前位置">2.4 左右跨：要的是「一次动作」，不是「当前位置」</h3>
-<p>最容易写错的地方：把侧移积分成一个位置，然后判断「位置偏左了就算左跨」。实际游玩时这个逻辑会连续得分，也会在玩家没动的时候误判。</p>
-<p>正确做法是把侧移识别成<strong>有起点、有方向、有回稳的一次事件</strong>：</p>
-<ol><li>去除重力，得到水平线性加速度；</li><li>补偿头部相对颈部的圆弧运动（扭头不应该算跨步）；</li><li>短时积分出速度和位移；</li><li>达到阈值且方向明确时，产出一个 <code>dodge-left</code> / <code>dodge-right</code> 事件；</li><li>事件被谱面消费一次后，同一动作不能再次得分。</li></ol>
-<pre class="code lang-js"><code>if (!this.strokeFired &amp;&amp; this.strokeDirection * distance &gt;= o.sideEnter) {
-  this.strokeFired = true;
-  this.lateralMove = {
-    action: this.strokeDirection &lt; 0 ? 'dodge-left' : 'dodge-right',
-    at: now,
-    distance
-  };
-}</code></pre>
-<p>在 <a href="src/lib/game.js">src/lib/game.js</a> 里，这个事件带着自己的时间戳进入判定，并通过 <code>_usedMovement</code> 记录「这次动作已经被哪一拍用掉」，从根上解决一次动作刷多拍的问题。</p>
-<h3 id="2-5-起跳-用失重-不用积分高度">2.5 起跳：用失重，不用积分高度</h3>
-<p>对加速度二次积分求高度，几秒钟就会漂移到无法使用。项目改用原始合加速度判断失重：</p>
-<pre class="code lang-js"><code>const rawMagnitude = Math.hypot(accel.x, accel.y, accel.z);
-const weightless = rawMagnitude &lt; this.options.weightless;</code></pre>
-<p>失重进入 <code>airborne</code>，落地冲击清空它。起跳状态和侧移状态各自独立维护，最后由谱面决定当前这一拍需要哪个动作。</p>
-<h3 id="2-6-判定窗口-以及它不代表什么">2.6 判定窗口，以及它不代表什么</h3>
-<p><a href="src/lib/game.js">src/lib/game.js</a> 的三层时间窗：</p>
-<pre class="code lang-js"><code>export const PERFECT_MS = 90;
-export const GOOD_MS = 180;
-export const OK_MS = 400;
-export const EXPIRE_MS = OK_MS + 40;</code></pre>
-<p>超出窗口仍未命中就记 Miss；暂停时时钟冻结；同一拍只结算一次。</p>
-<p><strong>必须说清楚的一点</strong>：结算页上的 <code>accuracy</code> 是「踩中谱面的比例」，属于游戏表现分，不是动作识别准确率。要评价后者，需要另采带人工标签的数据，并报告漏检、误检、方向混淆和静止误触发。项目里的研究日志明确标注 <code>groundTruth: 'not-labelled'</code>，本文也不会给出任何 Precision / Recall / F1 数字。</p>
-<hr>
-<h2 id="三-核心二-用灵珠做后端-做出跨账号排行榜">三、核心二：用灵珠做后端，做出跨账号排行榜</h2>
-<p>AIUI 应用本身没有自建服务器，这是很多体感、运动类应用的第一个坎：成绩存哪、谁来排名、怎么跨账号比较。灵珠提供了数据表 + 工作流 + API 智能体这套组合，正好可以当作轻后端。</p>
-<h3 id="3-1-数据模型-两张表-一次结算一行">3.1 数据模型：两张表，一次结算一行</h3>
-<div class="table-wrap"><table><thead><tr><th>表</th><th>作用</th><th>关键字段</th></tr></thead><tbody><tr><td><code>rhythm_user</code></td><td>用户快照</td><td><code>user_id</code>、<code>display_name</code>、<code>created_at</code>、<code>updated_at</code></td></tr><tr><td><code>rhythm_score</code></td><td>成绩流水</td><td><code>run_id</code>、<code>user_id</code>、<code>display_name</code>、<code>song_id</code>、<code>chart_version</code>、<code>score</code>、<code>played_at</code>、<code>score_basis</code></td></tr></tbody></table></div>
-<p>设计取舍：</p>
-<ul><li><strong>每首歌每个谱面版本一个榜</strong>：<code>song_id + chart_version</code>，改谱面就换版本，不会把旧成绩混进新判定标准里；</li><li><strong>每人取最高分</strong>，同分按最早 <code>played_at</code>；</li><li><strong>全时段榜</strong>，不做周榜重置，减少一次「结算时段」的复杂度；</li><li>保留 <code>score_basis = client_reported</code>，把信任边界写进数据本身。</li></ul>
-<p>完整字段定义见 <a href="backend/v1/tables.csv">backend/v1/tables.csv</a> 与 <a href="backend/v1/schema.sqlite.sql">backend/v1/schema.sqlite.sql</a>。</p>
-<h3 id="3-2-工作流-校验在前-查询在后-包装统一">3.2 工作流：校验在前，查询在后，包装统一</h3>
+<h2 id="一-先把需求翻译成后端契约">一、先把需求翻译成后端契约</h2>
+<p>排行榜看起来简单，实际要回答五个问题：</p>
+<div class="table-wrap"><table><thead><tr><th>问题</th><th>本项目的答案</th></tr></thead><tbody><tr><td>一条成绩包含什么？</td><td>谁、哪首歌、哪个谱面版本、多少分、什么时候打的</td></tr><tr><td>榜怎么切？</td><td>每个 <code>song_id + chart_version</code> 一个榜</td></tr><tr><td>重复提交怎么办？</td><td>每人只取最高分；同分按最早达成</td></tr><tr><td>没登录 / 没网怎么办？</td><td>本地先存，云端失败只做提示，不阻塞结算</td></tr><tr><td>分数可信吗？</td><td>客户端上报，服务端只做结构校验；不用于发奖</td></tr></tbody></table></div>
+<p>翻译成接口就两个操作：</p>
+<pre class="code lang-text"><code>score.submit      提交一局成绩，返回本人名次
+leaderboard.list  读某一首歌某个谱面版本的全时段榜</code></pre>
+<p>注意这里没有「注册用户」这个操作：AIUI 宿主已经能给出账号，后端不该再让用户填一遍昵称。</p>
+<h2 id="二-为什么用灵珠-而不是自建服务">二、为什么用灵珠，而不是自建服务</h2>
+<p>自建 Node + PostgreSQL 当然可行（这个项目早期就有一版），但对个人开发者有三个现实问题：要买服务器、要配域名证书、要自己处理账号体系和合规。</p>
+<p>灵珠给的是现成三件套：</p>
+<div class="table-wrap"><table><thead><tr><th>能力</th><th>在本项目里的角色</th></tr></thead><tbody><tr><td>数据表</td><td>存用户快照和成绩流水</td></tr><tr><td>工作流</td><td>校验、去重、排序、算名次；用代码节点写业务逻辑</td></tr><tr><td>API 智能体</td><td>给 AIX 一个可调用的入口，<code>api.agent.invokeAgentApi</code> 直连</td></tr></tbody></table></div>
+<p>代价也要说清楚：</p>
+<ul><li>它不是通用 REST 后端，请求要套进「智能体对话」的形式；</li><li>回包是<strong>流式文本</strong>，不是标准 JSON Body，解析要按真实时序写；</li><li>数据表有平台级权限模型（后面 <code>rw_mode</code> 那一节就是这个坑）；</li><li>查询能力有限，本项目只能「取最近 100 行再在代码里排序」。</li></ul>
+<p><strong>结论：适合中小规模排行榜、原型验证和教学示例；不适合高并发、强一致、需要防作弊的正式赛事。</strong></p>
+<h2 id="三-数据建模">三、数据建模</h2>
+<p>两张表，职责分开：</p>
+<div class="table-wrap"><table><thead><tr><th>表</th><th>作用</th><th>关键字段</th></tr></thead><tbody><tr><td><code>rhythm_user</code></td><td>用户快照</td><td><code>user_id</code>、<code>display_name</code>、<code>created_at</code>、<code>updated_at</code></td></tr><tr><td><code>rhythm_score</code></td><td>成绩流水，一次结算一行</td><td><code>run_id</code>、<code>user_id</code>、<code>display_name</code>、<code>song_id</code>、<code>song_title</code>、<code>chart_version</code>、<code>score</code>、<code>accuracy</code>、<code>max_combo</code>、<code>perfect</code>、<code>good</code>、<code>miss</code>、<code>played_at</code>、<code>score_basis</code></td></tr></tbody></table></div>
+<p>完整字段（含平台系统字段）见 <a href="backend/v1/tables.csv">backend/v1/tables.csv</a>，可直接照着重建。</p>
+<p>四个建模决定，事后看都是必要的：</p>
+<p><strong>1. 分榜键带上谱面版本。</strong> 谱面改了判定标准就变了，用 <code>chart_version</code> 把旧分留在旧榜里，避免「改谱之后历史成绩突然全部作废」这种最伤玩家的事。</p>
+<p><strong>2. 显示名存快照。</strong> <code>rhythm_score.display_name</code> 是提交当时的昵称，用户后来改名不会改历史榜。代价是同一人不同名，但比「榜单里名字突然全变」可接受。</p>
+<p><strong>3. 时间用服务端时间。</strong> <code>played_at</code> 由代码节点 <code>time.time()</code> 写入，不信任客户端时钟；同分排名要依赖它，必须可信。</p>
+<p><strong>4. 把信任级别写进字段。</strong> <code>score_basis</code> 固定为 <code>client_reported</code>。这不是装饰，是让后来接手的人一眼看到「这个分数是客户端说的」。</p>
+<h2 id="四-工作流-校验在前-查询在后-包装统一">四、工作流：校验在前，查询在后，包装统一</h2>
 <pre class="code lang-text"><code>开始(USER_INPUT)
  └→ 代码 A：解析 / 校验（node_dispatch.py）
      └→ 选择器
@@ -178,21 +137,42 @@ export const EXPIRE_MS = OK_MS + 40;</code></pre>
          ├ leaderboard.list  → 查询本曲前 100 行 → 包装榜单
          └ 否则              → 包装错误
                                   └→ 汇总（node_merge.py）→ 结束(output)</code></pre>
-<p>三个代码节点各管一件事：</p>
-<ul><li><strong>代码 A（<code>node_dispatch.py</code>）</strong>：校验协议外壳（顶层必须恰好是 <code>v / request_id / actor / op / data</code>）、曲目白名单、谱面版本、分数与判定数量的上下限，以及 <code>perfect + good + miss</code> 是否等于谱面音符数。校验结果压成 <code>payload_json</code> 传给后续节点。</li><li><strong>代码 B（<code>node_wrap.py</code>）</strong>：把查询回来的行按 <code>user_id</code> 去重取最高分、排序、分页，并算出本人名次。</li><li><strong>汇总（<code>node_merge.py</code>）</strong>：三个分支只有一条会产出，取第一个非空结果。</li></ul>
-<p>关键经验：<strong>把校验集中在代码 A，数据节点只做「按条件写」和「按条件查」</strong>。数据节点越简单，改曲目、改阈值时需要的改动就越少。</p>
-<h3 id="3-3-协议-一个自描述的-json-信封">3.3 协议：一个自描述的 JSON 信封</h3>
-<p>请求是一个版本化的 JSON：</p>
+<p>三个代码节点各管一件事，边界清晰：</p>
+<ul><li><strong>代码 A</strong>：把「用户输入的那段 JSON」变成「可信的、字段已校验的 payload」。所有拒绝都发生在这里。</li><li><strong>数据节点</strong>：只做两件事——按字段值写入、按 <code>song_id + chart_version</code> 查询最近 100 行。不在节点里做业务判断。</li><li><strong>代码 B</strong>：把查询结果变成榜单——按用户去重取最高分、排序、分页、算本人名次。</li><li><strong>汇总</strong>：三个分支只有一条会产出，取第一个非空的 <code>response_json</code>。</li></ul>
+<p>这样分工的好处很实际：加一首歌只需要改代码 A 的曲目表；改排序规则只需要改代码 B；数据节点几乎不用动。</p>
+<h3 id="4-1-代码-a-到底校验什么">4.1 代码 A 到底校验什么</h3>
+<p>这是全篇最值得抄的一段，规则不多但每条都对应一种真实故障：</p>
+<div class="table-wrap"><table><thead><tr><th>校验</th><th>挡住的问题</th></tr></thead><tbody><tr><td>顶层键必须<strong>恰好</strong>是 <code>v / request_id / actor / op / data</code></td><td>客户端多塞字段、按旧版本发请求</td></tr><tr><td>JSON 重复键直接报错</td><td><code>{"score":1,"score":99999}</code> 这类解析歧义</td></tr><tr><td>请求体 ≤ 24 KB</td><td>恶意大包拖垮节点</td></tr><tr><td><code>op</code> 必须在白名单内</td><td>未定义操作被当成默认分支执行</td></tr><tr><td><code>song_id + chart_version</code> 在曲目表内</td><td>伪造曲目、旧谱面混进新榜</td></tr><tr><td><code>perfect + good + miss == notes</code></td><td>统计造假的成绩（拍数按曲目/版本查表）</td></tr><tr><td><code>max_combo &lt;= perfect + good</code></td><td>连击大于命中数</td></tr><tr><td><code>score &lt;= 1000×perfect + 500×good</code> 且 <code>0 ≤ score ≤ 1000×notes</code></td><td>秒结算、分数超上限</td></tr><tr><td>文本字段 ≤ 24 字、无控制字符、无尖括号</td><td>昵称注入和排版炸裂</td></tr><tr><td><code>accuracy</code> 不由客户端上传</td><td>准确率一律服务端按 <code>(perfect + 0.6×good) / notes</code> 计算</td></tr></tbody></table></div>
+<p>曲目表本身也很小，新增歌曲就是加一行：</p>
+<pre class="code lang-python"><code>SONGS = {
+  'beatucada': {'title': 'Beatucada', 'duration_ms': 108475,
+                'notes_by_version': {1: 32}},
+  'into-my-dream': {'title': 'Into My Dream', 'duration_ms': 146571,
+                    'notes_by_version': {1: 54}},
+  'summer-overload': {'title': 'Summer Overload!', 'duration_ms': 145424,
+                      'notes_by_version': {1: 55}},
+}</code></pre>
+<p><strong>一个容易忽略的点：拍数必须和谱面同源。</strong> 拍数写在代码 A 里、谱面在客户端里，两边只要有一次不同步，所有成绩都会被判「统计不一致」。改谱必须同时发客户端和工作流。</p>
+<h3 id="4-2-代码-b-榜单是在-窗口内-算的">4.2 代码 B：榜单是在「窗口内」算的</h3>
+<p>数据节点返回最近 100 行，代码 B 在这 100 行里：</p>
+<ol><li>按 <code>user_id</code> 去重，只留最高分；</li><li>同分按 <code>played_at</code> 升序（早达成者在前），再按 <code>user_id</code> 兜底稳定排序；</li><li>截断到 <code>limit</code>（1–20，默认 8）；</li><li>标记 <code>is_me</code> 并计算本人名次（本人不在前 <code>limit</code> 时单独返回一条）。</li></ol>
+<p>这意味着 <code>total_players</code> 只是「窗口内的人数」，不是全站人数。用户量真的涨起来，必须换成分页或服务端排序。这个限制写进了文档，而不是假装没有。</p>
+<h2 id="五-协议-一个小而完整的信封">五、协议：一个小而完整的信封</h2>
 <pre class="code lang-json"><code>{
   "v": "rhythm-jump/1",
-  "request_id": "req_...",
+  "request_id": "req_8f3c...",
   "actor": { "id": "rokid_account_id", "name": "玩家" },
   "op": "leaderboard.list",
   "data": { "song_id": "beatucada", "chart_version": 1, "limit": 8 }
 }</code></pre>
-<p><code>request_id</code> 不是装饰：客户端用它丢弃过期回包，避免上一首曲子的榜单画到当前结算页上。协议细节见 <a href="backend/v1/protocol.md">backend/v1/protocol.md</a>。</p>
-<h3 id="3-4-客户端-流式回包比文档更难伺候">3.4 客户端：流式回包比文档更难伺候</h3>
-<p>AIX 端通过 <code>api.agent.invokeAgentApi</code> 调用，返回的是流式事件。真实接入时会同时遇到好几种形态：</p>
+<p>响应形如 <code>{"v":"rhythm-jump/1","request_id":"...","ok":true,"data":{...}}</code>，失败时 <code>ok:false</code> 并带 <code>error.code / error.retryable</code>。</p>
+<p>三个细节：</p>
+<ul><li><code>request_id</code> 是为「串台」准备的。用户快速切歌时，上一首的榜可能后到；客户端只接受与当前请求匹配的回包，否则直接丢弃。</li><li><code>actor</code> 是身份，不是凭据。它来自 <code>getProfile().accountId</code>，平台没有为它签名。</li><li><code>v</code> 变动即协议不兼容，宁可报错也不要猜字段。</li></ul>
+<p>另外，工作流最终把 JSON 放在 <code>RHYTHM_RESULT</code> 前缀之后返回，灵珠部分调试入口还会再包一层 <code>{"output":"..."}</code>。客户端必须两种都能吃。</p>
+<h2 id="六-aix-客户端-流式回包比文档难伺候">六、AIX 客户端：流式回包比文档难伺候</h2>
+<p>AIX 侧就是一个函数调用，但返回的是流，真实接入时会同时遇到四种形态：</p>
+<div class="table-wrap"><table><thead><tr><th>形态</th><th>出现场景</th></tr></thead><tbody><tr><td>分段 <code>message.content</code></td><td>正常流式输出，正文被切成很多片</td></tr><tr><td>结束事件的 <code>final_answer</code></td><td>有些宿主只在结束时给完整文本</td></tr><tr><td><code>message.metadata.output</code></td><td>工作流输出变量走元数据</td></tr><tr><td>先空 <code>end</code>、正文后到</td><td>真机联调时出现过，最坑的一种</td></tr></tbody></table></div>
+<p><a href="src/lib/leaderboard-client.js">src/lib/leaderboard-client.js</a> 的处理方式：</p>
 <pre class="code lang-js"><code>stream = api.agent.invokeAgentApi({
   body: {
     conversation_id: this._conversationId,
@@ -200,85 +180,68 @@ export const EXPIRE_MS = OK_MS + 40;</code></pre>
     question: JSON.stringify(envelope)
   }
 });</code></pre>
-<p><a href="src/lib/leaderboard-client.js">src/lib/leaderboard-client.js</a> 做了几件现场才知道要做的事：</p>
-<ul><li>兼容分段 <code>message.content</code>、结束事件的 <code>final_answer</code>、<code>message.metadata.output</code>，以及灵珠 Bot 外层 <code>{"output":"..."}</code> 的包裹；</li><li>处理「先来一个空 end、随后才来正文」的真实时序，给结束事件一个短的宽限期再判失败；</li><li>解析前校验 <code>v</code> 与 <code>request_id</code>；</li><li>整条链路有总超时，流式错误与解析错误分开处理。</li></ul>
-<p>这些分支在测试里都有对应用例（空 end、仅 <code>final_answer</code>、部分内容回退到完整答案、工具回包穿透、超时拒绝等）。</p>
-<h3 id="3-5-踩得最疼的一坑-rw-mode">3.5 踩得最疼的一坑：<code>rw_mode</code></h3>
-<p>现象很有迷惑性：两个账号都能提交成绩，工作流查询语句里也确实只按 <code>song_id + chart_version</code> 过滤，但每个账号登录后<strong>只能看到自己的成绩</strong>。</p>
-<p>问题不在 SQL，也不在排序代码，而在数据库表的权限模式：</p>
-<div class="table-wrap"><table><thead><tr><th><code>rw_mode</code></th><th>含义</th><th>对排行榜的影响</th></tr></thead><tbody><tr><td><code>1</code></td><td>单用户读写</td><td>平台按调用者隔离记录，谁登录只看谁的</td></tr><tr><td><code>2</code></td><td>用户只读</td><td>玩家无法提交成绩</td></tr><tr><td><code>3</code></td><td>多用户读写</td><td>支持新增成绩 + 跨账号查询的共享榜单</td></tr></tbody></table></div>
-<p><strong><code>rw_mode</code> 是表级属性，不是工作流属性，也不是 AIX 配置。</strong> 共享成绩表必须是 <code>3</code>，账号资料表则保持自己的权限，不跟着批量放开。</p>
-<p>修改时的纪律同样重要：</p>
-<ol><li>先备份完整表配置（含字段 ID、顺序、类型、必填）；</li><li>只改目标表的 <code>rw_mode</code>；</li><li>回读确认表标识与字段都没变；</li><li><strong>用两个真实账号验收</strong>——单账号试运行、在请求里换一个 <code>actor.id</code>，都不能证明平台的调用者隔离已经解除。</li></ol>
-<p>本项目只把 <code>rhythm_score</code> 从 <code>1</code> 改成 <code>3</code>，回读保留全部 14 个业务字段，修复后多账号历史成绩在同一榜单中可见。完整步骤（含备份脚本、回读核对、跨账号验收清单）整理在 <a href="docs/lingzhu-leaderboard-rw-mode.md">docs/lingzhu-leaderboard-rw-mode.md</a>，可以直接给其他 AIUI 项目复用；这套接线与排障流程也整理成了可直接调用的技能 <a href="https://github.com/sengmitnick/rokid-lingzhu-backend">rokid-lingzhu-backend</a>。</p>
-<h3 id="3-6-信任边界-排行榜能排-不代表分数可信">3.6 信任边界：排行榜能排，不代表分数可信</h3>
-<p>服务端会校验数量关系与上限，但<strong>无法证明客户端真的做了那个动作</strong>：<code>actor.id</code> 由客户端声明，改包就能冒充。因此：</p>
-<ul><li>榜单适合功能演示与普通游玩；</li><li>不适合发奖、正式竞赛或任何需要可信裁决的场景；</li><li>真要用于比赛，需要另加服务端验证、请求签名、防重放与可信身份链路。</li></ul>
-<p>把这句话写进 README 和协议文档，比写一个看起来很严谨的校验函数更诚实。</p>
-<hr>
-<h2 id="四-两个核心怎么接起来">四、两个核心怎么接起来</h2>
-<h3 id="4-1-本地永远优先">4.1 本地永远优先</h3>
-<p>结算顺序是固定的：<strong>先写本地 <code>rhythm-history</code>（最近 20 局），再尝试同步云端</strong>。本地写失败会明确报错；云端失败只提示「排行榜未同步 · 本地已保存」。断网、未登录、后台还没发布，都不影响玩家看到自己这一局的结果。</p>
-<h3 id="4-2-离线是默认状态-不是异常状态">4.2 离线是默认状态，不是异常状态</h3>
-<p>公开版本 <code>agentId</code> 默认为空，排行榜直接进离线态。这让仓库可以被任何人克隆后直接跑起来，也避免把作者的线上榜单暴露给所有下载者。</p>
-<h3 id="4-3-状态机把两个核心隔开">4.3 状态机把两个核心隔开</h3>
-<p><a href="src/lib/session.js">src/lib/session.js</a> 统一管理教程 / 校准 / 游玩 / 暂停 / 结算，排行榜只是其中一种页面状态。好处是：传感器断流只会暂停游戏，不会把结算页冲掉；从结算打开排行榜再返回，仍然回到原来的结算快照。</p>
-<hr>
-<h2 id="五-智能体-id-不进仓库-示例配置-本地忽略">五、智能体 ID 不进仓库：示例配置 + 本地忽略</h2>
-<p>排行榜需要一个 Bot ID。把它写进源码再开源，等于把自己的线上入口交出去，别人还能往你的表里写数据。</p>
-<p>所以仓库采用「示例配置 + 本地忽略」：</p>
-<pre class="code lang-text"><code>config/service-config.example.js     ← 提交进仓库，agentId 为空
-src/lib/service-config.local.js      ← git 忽略，存放真实 Bot ID
+<ul><li>三种文本来源一起收集，任意一种能解析成功就完成；</li><li>遇到 <code>end</code> 时先给 1.5 秒宽限期（<code>END_REPLY_GRACE_MS</code>），避免「正文还在路上就判失败」；</li><li>解析前校验 <code>v</code> 与 <code>request_id</code>，再判断 <code>ok</code>；</li><li>外层 <code>{"output":"..."}</code> 只解一层，解不开就按协议错误报告，不猜；</li><li>整体 15 秒超时，流错误与解析错误分开归类，界面文案也不同。</li></ul>
+<p>这些分支听着琐碎，但每一条都对应一次真实失败。<strong>后端写得再对，客户端把回包读错，用户看到的就是「排行榜没有返回内容」。</strong></p>
+<h2 id="七-最疼的坑-rw-mode">七、最疼的坑：<code>rw_mode</code></h2>
+<h3 id="7-1-现象">7.1 现象</h3>
+<p>两个账号都能提交成绩，工作流查询语句里也确实只按 <code>song_id + chart_version</code> 过滤，但每个账号登录后<strong>只能看到自己的成绩</strong>。</p>
+<p>第一反应是去查 SQL、查排序、查去重代码——全是错的。问题在数据库表的权限模式。</p>
+<h3 id="7-2-原因">7.2 原因</h3>
+<div class="table-wrap"><table><thead><tr><th><code>rw_mode</code></th><th>模式</th><th>对共享榜的影响</th></tr></thead><tbody><tr><td><code>1</code></td><td>单用户读写（LimitedReadWrite）</td><td>平台按调用者给记录加范围，谁登录只看自己的</td></tr><tr><td><code>2</code></td><td>用户只读（ReadOnly）</td><td>玩家提交不了成绩</td></tr><tr><td><code>3</code></td><td>多用户读写（UnlimitedReadWrite）</td><td>可跨用户查询，共享榜必须用这个</td></tr></tbody></table></div>
+<p><strong><code>rw_mode</code> 是表级属性，不是工作流属性，也不是 AIX 配置。</strong> 工作流访问表时平台会应用它；查询节点没写 <code>user_id</code> 条件，不代表查询已经跨账号。</p>
+<h3 id="7-3-修改纪律">7.3 修改纪律</h3>
+<ol><li>先<strong>备份完整表配置</strong>（含字段 ID、顺序、类型、必填），不要只记一个模式值；</li><li>只改目标表：成绩表 <code>rhythm_score</code> 改成 <code>3</code>，账号资料表 <code>rhythm_user</code> 保持原权限，<strong>不做批量放开</strong>；</li><li>更新后<strong>回读</strong>，确认 <code>id</code>、表名、字段列表与备份一致（平台更新接口的响应里有些元数据是占位值，不能拿它当最终状态）；</li><li><strong>用两个真实账号验收</strong>：A、B 各自完成同一曲目，双方都能在榜里看到彼此的分数，「你」的标记跟随当前登录账号。</li></ol>
+<p>第 4 步不能省。单账号试运行、在请求 JSON 里换一个 <code>actor.id</code>、本地跑一遍排序测试，都<strong>证明不了</strong>平台的调用者隔离已经解除。</p>
+<p>本项目只把 <code>rhythm_score</code> 从 <code>1</code> 改成 <code>3</code>，回读确认 14 个业务字段未变；修复后多个账号的历史成绩在同一榜单中可见，Studio 查榜与眼镜端均确认过。完整操作步骤（含离线生成更新正文的脚本、回读核对、验收清单）整理在 <a href="docs/lingzhu-leaderboard-rw-mode.md">docs/lingzhu-leaderboard-rw-mode.md</a>，也做成了可调用技能 <a href="https://github.com/sengmitnick/rokid-lingzhu-backend">rokid-lingzhu-backend</a>。</p>
+<blockquote><p>补充一句边界：<code>rw_mode: 3</code> 给的是「能跨用户读写」的能力，不等于细粒度权限系统。本项目只开放「新增成绩」和「查询榜单」，没有修改、删除他人成绩的接口。</p></blockquote>
+<h2 id="八-信任边界-能排名-不代表分数可信">八、信任边界：能排名，不代表分数可信</h2>
+<p>服务端做了九条校验，能挡住秒结算、统计造假、超上限分数。但它挡不住：</p>
+<ul><li>修改客户端直接上报一个合法范围内的假分数；</li><li>重放一段真实成绩；</li><li>伪造 <code>actor.id</code> 冒充别人。</li></ul>
+<p>因为 <code>actor</code> 只是客户端声明，平台没有设备证明。所以：</p>
+<ul><li>榜单定位是<strong>展示与自娱</strong>，不能用于发奖；</li><li>真要办比赛，需要另做服务端验证、请求签名、防重放、可信身份链路；</li><li>这些限制写进 README 和协议文档，而不是留在开发者脑子里。</li></ul>
+<p>把「不可信」标注出来，比写一个看起来很严谨的校验函数更有价值。</p>
+<h2 id="九-智能体-id-不进仓库">九、智能体 ID 不进仓库</h2>
+<p>排行榜要一个 Bot ID。写进源码再开源，等于把自己的线上入口交出去——别人不仅能看，还能往你的表里写数据。</p>
+<p>所以仓库用「示例配置 + 本地忽略」：</p>
+<pre class="code lang-text"><code>config/service-config.example.js     ← 入库，agentId 为空
+src/lib/service-config.local.js      ← git 忽略，存真实 Bot ID
 src/lib/service-config.js            ← 运行时入口，只做再导出</code></pre>
-<pre class="code lang-bash"><code>npm run config:init   # 第一次：从示例生成本地配置，已存在则不覆盖</code></pre>
-<p>配套的两个小设计：</p>
-<ul><li>所有 npm 脚本（<code>check</code> / <code>test</code> / <code>pack</code> / <code>preview</code>）都会先跑 <code>config:init</code>，所以新克隆的仓库<strong>开箱即可检查、测试、打包</strong>，不会因为缺文件而失败；</li><li><code>init</code> 永远不会覆盖已有文件，填好的配置在升级、拉取代码后依然保留。</li></ul>
-<p>同一套配置对象里还放着研究诊断开关（<code>motionDiagnostics</code>、<code>fullMotionTrace</code>）和本地日志接收地址，这些同样属于「个人环境参数」，一起走本地文件。</p>
-<hr>
-<h2 id="六-交互与界面">六、交互与界面</h2>
-<ul><li><strong>纯黑底</strong>：眼镜端统一 <code>#000000</code> 光学透明底，只用单色绿细线画轮廓。原因是光学显示下大面积深色渐变会在视野里形成色膜，这不是审美偏好，是可读性问题。</li><li><strong>轻量空间舞台</strong>：一台约 46° 垂直视场的透视相机，投影贴地靶位、轨道和来袭箭头；头部转动只产生受限视差，HUD 固定不动。</li><li><strong>两套输入</strong>：镜腿滑动切换焦点并单击确认；也可以在菜单里转头瞄准，停留 3 秒确认。固件会把一次滑动上报成一串方向键，所以代码里加了滑动静默窗口，避免一次滑动跳好几项。</li><li><strong>先教再玩</strong>：首次进入是安全准备页与新手教程，左、右各成功两次再学起跳，教程不用倒计时 Miss 催人。</li></ul>
-<p><img alt="选曲界面（AIUI 预览）" src="docs/images/song-select.png" loading="lazy"> <img alt="新手教程（AIUI 预览）" src="docs/images/tutorial.png" loading="lazy"> <img alt="对局界面（AIUI 预览）" src="docs/images/gameplay.png" loading="lazy"></p>
-<blockquote><p>以上为 AIUI 预览素材，用来说明界面与交互设计，不作为真机动作识别效果或整局稳定性的证明。</p><p>【作者补充：如有真机照片或录屏，请在此追加，并注明设备型号、系统版本、录制日期与对应 Commit。】</p></blockquote>
-<hr>
-<h2 id="七-验证-把三类证据分开说">七、验证：把三类证据分开说</h2>
-<h3 id="7-1-自动化测试-可重复">7.1 自动化测试（可重复）</h3>
-<p>2026-11-24，从公开快照干净安装后执行：</p>
+<pre class="code lang-bash"><code>npm run config:init   # 从示例生成本地配置；已存在则不覆盖</code></pre>
+<p>两个配套设计：</p>
+<ul><li>所有 npm 脚本（<code>check</code> / <code>test</code> / <code>pack</code> / <code>preview</code>）都会先跑 <code>config:init</code>，新克隆的仓库开箱即可检查、测试、打包，不会因为缺文件报错；</li><li>初始化<strong>永不覆盖</strong>已有文件，填好的配置在拉代码、升级后依然保留。</li></ul>
+<p><code>agentId</code> 为空时排行榜就是离线态（界面上是「排行榜未配置 · 本地成绩已保存」），本地成绩照常保存，不影响试玩。</p>
+<h2 id="十-验证-哪些是自动化的-哪些还没做">十、验证：哪些是自动化的，哪些还没做</h2>
+<h3 id="10-1-可重复的部分">10.1 可重复的部分</h3>
+<p>2026-11-24，从公开快照干净安装后：</p>
 <pre class="code lang-bash"><code>npm ci --cache .npm-cache
 npm run check
 npm run test:all
 npm run pack</code></pre>
-<div class="table-wrap"><table><thead><tr><th>检查</th><th>结果</th></tr></thead><tbody><tr><td>AIUI 结构检查</td><td>通过：2 个页面、25 个脚本（含一份本地配置），本地模块路径全部解析</td></tr><tr><td>Node 自动化测试</td><td><strong>186 项通过，0 失败</strong></td></tr><tr><td>灵珠排行榜契约测试（Python + SQLite）</td><td><strong>15 项通过，0 失败</strong></td></tr><tr><td>AIX 打包</td><td>通过，<code>output/rhythm-jump.aix</code> 约 3.50 MB</td></tr></tbody></table></div>
-<p>Node 测试覆盖：判定时间窗与过期 Miss、一次动作只结算一拍、合成 IMU 样本下的侧移与起跳、头动补偿、校准复用与断流、页面生命周期、纯黑背景与空间绘制、音频资源复用与失败回退、排行榜多种流式回包形态、研究日志的分块与异常路径。Python 契约测试覆盖协议外壳、分数上下限、榜单去重与排序，全部在内存 SQLite 上跑，不碰线上数据。</p>
-<p><strong>这些是自动化夹具，不是真人识别准确率。</strong> 记录见 <a href="docs/validation.md">docs/validation.md</a>。</p>
-<h3 id="7-2-studio-预览-可检查">7.2 Studio 预览（可检查）</h3>
-<p>预览能核对页面加载、模块路径、布局、Canvas 绘制和部分交互流程。它证明不了真机上的采样率、时延、音频偏移、功耗和光学观感。</p>
-<h3 id="7-3-真机-本次未新增">7.3 真机（本次未新增）</h3>
-<p>现有记录能支撑的真机结论只有一条：<strong>用户已在眼镜端确认修复后的共享排行榜可见。</strong> 本次公开快照没有做新的真机采样，因此本文不声称：</p>
-<ul><li>三首曲目都完成了整局真机验证；</li><li>达到了某个动作识别准确率；</li><li>完成了长时间功耗与稳定性验收；</li><li>应用已经上架。</li></ul>
-<p>【作者补充：最终真机验证表——设备型号、系统版本、Studio 版本、Commit、曲目、时长、已完成项、观察到的现象、失败项。】</p>
-<hr>
-<h2 id="八-复盘">八、复盘</h2>
-<p><strong>1. 设备能力要按最差情况设计。</strong> 传感器会断流，回调会迟到，音频图有容量上限，存储会失败。生命周期、超时、回退和释放必须和玩法一起写，而不是最后再补。</p>
-<p><strong>2. 传感器边界要写进玩法，而不是写进免责声明。</strong> 看不全手脚，就把动作收敛到头部能看见的重心变化，让教程、谱面、判定共享同一套能力边界。</p>
-<p><strong>3. 平台的权限模型比查询语句更先决。</strong> 查询没写 <code>user_id</code> 不等于跨账号；<code>rw_mode</code> 才是那张表的隔离开关，而且必须用真实账号验收。</p>
-<p><strong>4. 后端校验要和信任边界一起说。</strong> 数量与上限校验能挡格式错误，挡不住伪造。把 <code>score_basis</code> 和「不用于发奖」写进文档，比事后解释便宜。</p>
-<p><strong>5. 个人 ID 不应该进入开源仓库。</strong> 示例配置 + 本地忽略 + 自动初始化，既保证开箱可用，也不泄露线上入口。</p>
-<p>后续方向：采集带人工标签的多用户数据并分别报告漏检/误检/方向混淆；在真机上记录整曲帧间隔与音频偏移；榜单扩量后改服务端排序与分页；若要用于竞赛，再补可信提交链路。</p>
-<hr>
-<h2 id="九-开源与素材说明">九、开源与素材说明</h2>
-<pre class="code lang-text"><code>src/        AIUI 页面、IMU 判定、空间绘制、排行榜客户端
-backend/v1/ 灵珠工作流代码节点、协议、表结构与契约测试
-config/     智能体定义、服务配置示例
-tests/      Node 自动化测试
-tools/      结构检查、谱面导入、研究日志工具
-docs/       验证记录、rw_mode 指南、预览素材</code></pre>
-<ul><li>仓库：<a href="https://github.com/sengmitnick/rhythm-jump">https://github.com/sengmitnick/rhythm-jump</a></li><li>配套技能：<a href="https://github.com/sengmitnick/rokid-lingzhu-backend">rokid-lingzhu-backend</a> —— 灵珠后端接线、流式回包排障与跨账号共享榜单的 Codex skill</li><li>原创代码：<a href="LICENSE">MIT License</a></li><li>第三方素材：<a href="THIRD_PARTY_NOTICES.md">THIRD_PARTY_NOTICES.md</a></li><li>验证记录：<a href="docs/validation.md">docs/validation.md</a></li><li>对应版本：【Tag 或 Commit】</li></ul>
-<p>正式曲目来自 OutFox Serenity v2.5，署名与修改记录见 <a href="src/assets/audio/serenity/CREDITS.txt">src/assets/audio/serenity/CREDITS.txt</a>：</p>
-<div class="table-wrap"><table><thead><tr><th>内容</th><th>作者</th><th>许可</th></tr></thead><tbody><tr><td>Beatucada</td><td>Kurio Prokos</td><td>CC BY-SA 4.0</td></tr><tr><td>Into My Dream</td><td>Lagoona / Andreas Viklund</td><td>CC BY 4.0</td></tr><tr><td>Summer Overload!</td><td>© 2022 Akako Hinami</td><td>CC BY-SA 4.0</td></tr><tr><td>三首 Beginner 谱面</td><td>Daniel Rotwind</td><td>CC BY 4.0</td></tr></tbody></table></div>
-<p>项目把 SSC 谱面转换为带时间戳的左跨 / 起跳 / 右跨事件并省略下箭头，录音从 Opus 转为 64 kbps MP3，选曲试听使用 8 秒 48 kbps 片段；改编内容沿用源素材许可。旧练习谱面 Party Sector（Joth）按 CC0 1.0 使用。MIT 许可不覆盖第三方音频与谱面。</p>
+<div class="table-wrap"><table><thead><tr><th>检查</th><th>结果</th></tr></thead><tbody><tr><td>工作流契约测试（Python + 内存 SQLite）</td><td><strong>15 项通过</strong></td></tr><tr><td>排行榜客户端测试（Node）</td><td><strong>11 项通过</strong></td></tr><tr><td>全仓库回归</td><td><strong>186 项通过，0 失败</strong></td></tr><tr><td>AIUI 结构检查</td><td>通过，本地模块路径全部解析</td></tr><tr><td>AIX 打包</td><td>通过，约 3.50 MB</td></tr></tbody></table></div>
+<p>契约测试覆盖：协议外壳与多余字段、重复键、曲目与谱面白名单、分数上限、判定数与拍数一致性、每人最高分与同分排序、本人不在前 N 时的名次、错误透传、以及 SQLite 里真实查询与包装逻辑的一致性。</p>
+<p>客户端测试覆盖：编码与解析、白名单拒绝、超时、无账号、用户同步失败不影响成绩、空 <code>end</code> 后补正文、只有 <code>final_answer</code>、只有 <code>metadata.output</code>、外层 <code>{"output":"..."}</code> 包裹。</p>
+<h3 id="10-2-还不能声称的">10.2 还不能声称的</h3>
+<ul><li>没有做压测：100 行窗口在千人量级会失效，这是已知设计上限；</li><li>没有做安全审计：分数不可信的结论只基于代码阅读，不是渗透测试；</li><li>真机证据仅限于「共享榜单在眼镜端可见」，不代表任意网络条件下都稳定；</li><li>本文不给出任何识别类指标——那是游戏侧的事，与后端无关。</li></ul>
+<p>完整记录见 <a href="docs/validation.md">docs/validation.md</a>。</p>
+<h2 id="十一-想在自己的-aiui-项目里复用-照着这张清单做">十一、想在自己的 AIUI 项目里复用，照着这张清单做</h2>
+<ol><li>想清楚<strong>榜怎么切</strong>（按关卡？按难度？按赛季？），把它变成表里的一个字段；</li><li>建两张表：用户快照 + 成绩流水，成绩表写 <code>score_basis</code>；</li><li><strong>只改成绩表</strong>的 <code>rw_mode</code> 为 <code>3</code>，账号表保持私有；改前备份、改后回读；</li><li>工作流按「校验 → 分支 → 数据节点 → 包装 → 汇总」搭，校验全部集中在代码 A；</li><li>客户端先写本地，再同步云端，云端失败只提示不阻塞；</li><li>客户端解析回包时同时兼容 <code>content</code> / <code>final_answer</code> / <code>metadata.output</code> / 空 <code>end</code>；</li><li>用 <code>request_id</code> 丢弃过期回包；</li><li><strong>用两个真实账号</strong>验收共享榜单；</li><li>在 README 顶部写清「分数是客户端上报，不用于发奖」。</li></ol>
+<h2 id="十二-复盘">十二、复盘</h2>
+<p><strong>1. 平台权限模型比查询语句更先决。</strong> 查不到别人的数据，先看表的 <code>rw_mode</code>，再看 SQL。</p>
+<p><strong>2. 回包格式要按真实时序写，不要按文档写。</strong> 空 <code>end</code> 之后补正文这种事，只有真机会告诉你。</p>
+<p><strong>3. 校验要集中，数据节点要笨。</strong> 节点里做业务判断，改一次需求就要重连一次工作流。</p>
+<p><strong>4. 拍数这类「两边都有的常量」是长期隐患。</strong> 能放服务端就放服务端，放不下就必须在发版清单里绑死。</p>
+<p><strong>5. 信任边界要写进数据模型。</strong> <code>score_basis</code> 一个字段，省掉无数次解释。</p>
+<p>后续真正该做的：把「取 100 行再排」换成服务端排序分页；给成绩提交加签名与防重放；把用户表改成 <code>upsert</code> 而不是每次插快照。</p>
+<h2 id="十三-开源与素材">十三、开源与素材</h2>
+<pre class="code lang-text"><code>backend/v1/  灵珠代码节点、协议、表结构、契约测试（本文主体）
+config/      智能体定义、服务配置示例
+src/lib/     排行榜客户端与协议解析
+docs/        本文、rw_mode 指南、验证记录</code></pre>
+<ul><li>仓库：<a href="https://github.com/sengmitnick/rhythm-jump">https://github.com/sengmitnick/rhythm-jump</a></li><li>网页版（GitHub Pages）：<a href="https://sengmitnick.github.io/rhythm-jump/">https://sengmitnick.github.io/rhythm-jump/</a></li><li>配套技能：<a href="https://github.com/sengmitnick/rokid-lingzhu-backend">rokid-lingzhu-backend</a>（在 Codex 里用 $rokid-lingzhu-backend 调用）</li><li>原创代码：<a href="LICENSE">MIT License</a>　｜　第三方素材：<a href="THIRD_PARTY_NOTICES.md">THIRD_PARTY_NOTICES.md</a></li><li>对应版本：【Tag 或 Commit】</li></ul>
+<p>文中排行榜截图使用测试昵称（阿青、Ming、小林等），不含真实玩家数据。示例仓库不包含真实 Bot ID、数据库表 ID、账号信息与线上成绩。</p>
 <hr>
 <h2 id="作者提交前核对项">作者提交前核对项</h2>
-<ul><li>[ ] 补充作者昵称、真实 AIUI ID、实际上架状态与可核验链接。</li><li>[ ] 补充最终 Tag / Commit、真机验证表与对应版本的截图或录屏。</li><li>[ ] 如需给出识别指标，补充标注方法、样本量、负样本与 Precision / Recall / F1；否则不要填写。</li><li>[ ] 论坛以「普通贴」发布到「征文计划」板块并保持公开可见。</li><li>[ ] CSDN 发布同一篇原创文章，可见范围设为「全部可见」。</li><li>[ ] 如参与多平台奖励，按活动规则补充对应平台链接与截图。</li></ul>
+<ul><li>[ ] 补充作者昵称、真实 AIUI ID、实际上架状态与可核验链接。</li><li>[ ] 补充最终 Tag / Commit 与跨账号验收截图。</li><li>[ ] 论坛以「普通贴」发布到「征文计划」板块并保持公开可见。</li><li>[ ] CSDN 发布同一篇原创文章，可见范围设为「全部可见」。</li><li>[ ] 如参与多平台奖励，按活动规则补充对应平台链接与截图。</li></ul>
     <footer>
       <span>原创代码 MIT，第三方音频与谱面按各自 CC 许可</span>
       <a href="https://github.com/sengmitnick/rhythm-jump">github.com/sengmitnick/rhythm-jump</a>
