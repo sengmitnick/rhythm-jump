@@ -14,7 +14,8 @@ import { TutorialVoice } from '../../lib/tutorial-voice.js';
 import { renderSpatial as render } from '../../lib/spatial-render.js';
 import { HeadPose } from '../../lib/head-pose.js';
 import { createPerfMeter } from '../../lib/perf-meter.js';
-import { MIN_INTERVAL_MS, nextFrameInterval } from '../../lib/frame-pacing.js';
+import { FramePacer, shouldDrawFrame } from '../../lib/frame-pacing.js';
+import { SensorClock } from '../../lib/sensor-clock.js';
 import { SERVICE_CONFIG } from '../../lib/service-config.js';
 import { ResearchLog } from '../../lib/research-log.js';
 import { LanResearchLog } from '../../lib/lan-research-log.js';
@@ -36,7 +37,8 @@ const SWIPE_QUIET_MS = 280;
 export default {
   data: {},
   onLoad() {
-    this._audio=new RhythmAudio(AudioContext, AudioPlayer);
+    const timing=SERVICE_CONFIG.timing||{};
+    this._audio=new RhythmAudio(AudioContext,AudioPlayer,{clock:()=>performance.now(),audioOffsetMs:timing.audioOffsetMs});
     this._tutorialVoice=new TutorialVoice();
     this._research=MOTION_DIAGNOSTICS?new ResearchLog({storage:wx,onError:e=>console.warn('[rhythm] research storage',String(e))}):null;
     this._rawTraceIntervalMs=SERVICE_CONFIG.fullMotionTrace===true?0:DIAGNOSTIC_RAW_TRACE_INTERVAL_MS;
@@ -47,7 +49,7 @@ export default {
       onTutorialRepeat:()=>this._tutorialVoice.retry(),onResult:(r,s)=>this._save(r,s),
       onTrace:MOTION_DIAGNOSTICS?e=>this._trace(e):null,
       rawTraceIntervalMs:this._rawTraceIntervalMs,
-      audioOffsetMs:SERVICE_CONFIG.timing?.audioOffsetMs,
+      displayOffsetMs:timing.displayOffsetMs,
     });
     this._session.courses=this._session.courses.filter(course=>course.native);
     this._menu=new MenuNavigation(this._session.courses.length);
@@ -57,10 +59,12 @@ export default {
     this._tutorialAutoPending=!tutorialComplete;this._tutorialTapAt=null;
     this._lastTapAt=-Infinity;this._lastTapSource=null;this._lastSwipeAt=-Infinity;
     this._sensors=[];
-    this._leaderboardClient=SERVICE_CONFIG.agentId&&typeof LeaderboardClient==='function'
+    this._sensorClock=new SensorClock();
+    const agentId=typeof SERVICE_CONFIG.agentId==='string'?SERVICE_CONFIG.agentId.trim():'';
+    this._leaderboardClient=agentId&&typeof LeaderboardClient==='function'
       ?new LeaderboardClient({
         createOpenAPI:async()=>{const module=await import('open');return module.createOpenAPI();},
-        agentId:SERVICE_CONFIG.agentId,timeoutMs:15000,
+        agentId,timeoutMs:15000,
       }):null;
     this._leaderboard={status:'idle',songId:'',songTitle:'',chartVersion:0,entries:[],me:null,totalPlayers:0,message:'',revision:0};
     this._leaderboardCache=new Map();
@@ -79,6 +83,9 @@ export default {
     }):null;
     this._frameStats = null;
     this._lastPlayingFrameAt = null;
+    this._framePacer = new FramePacer();
+    this._frameIntervalMs = this._framePacer.intervalMs;
+    this._lastAnimationFrameAt = null;
     this._timer = null;
     this._frameWatch = null;
     this._usesAnimationFrame = false;
@@ -117,36 +124,53 @@ export default {
   onUnload(){this._unloaded=true;if(this._initTimer!=null)clearTimeout(this._initTimer);this.onHide();this._session?.destroy().catch(console.error);this._ctx=null;},
   _loop(){
     if (this._timer != null) return;
-    if (!(this._frameIntervalMs > 0)) this._frameIntervalMs = MIN_INTERVAL_MS;
     this._lastFrameKey = null;
     this._usesAnimationFrame = typeof requestAnimationFrame === 'function' && typeof cancelAnimationFrame === 'function';
     if (this._usesAnimationFrame) {
-      let nextFrameAt = performance.now() + this._frameIntervalMs;
+      this._lastAnimationFrameAt = performance.now();
+      let nextFrameAt = this._lastAnimationFrameAt + this._frameIntervalMs;
       const draw = () => {
         if (!this._visible || !this._usesAnimationFrame) return;
-        if (this._frameWatch != null) clearTimeout(this._frameWatch);
-        this._frameWatch = null;
         this._timer = requestAnimationFrame(draw);
         const now = performance.now();
-        if (now + 1 < nextFrameAt) return;
+        this._lastAnimationFrameAt = now;
+        if (!shouldDrawFrame(now, nextFrameAt)) return;
         const interval = this._frameIntervalMs;
         nextFrameAt = Math.max(nextFrameAt + interval, now + interval / 2);
         this._frame();
       };
       this._timer = requestAnimationFrame(draw);
-      // Some hosts expose the API before they can deliver a display callback.
-      this._frameWatch = setTimeout(() => {
-        this._frameWatch = null;
-        this._stopLoop();
-        if (this._visible) {
-          this._timer = setInterval(() => this._frame(), this._frameIntervalMs);
-          this._frame();
-        }
-      }, FRAME_START_TIMEOUT_MS);
-    } else {
-      this._timer = setInterval(() => this._frame(), this._frameIntervalMs);
-    }
+      this._armFrameWatch();
+    } else this._startTimerLoop();
     this._frame();
+  },
+  _armFrameWatch(){
+    if(this._frameWatch!=null)clearTimeout(this._frameWatch);
+    const check=()=>{
+      this._frameWatch=null;
+      if(!this._visible||!this._usesAnimationFrame)return;
+      const age=performance.now()-this._lastAnimationFrameAt;
+      if(age>=FRAME_START_TIMEOUT_MS){
+        if(this._timer!=null)cancelAnimationFrame(this._timer);
+        this._timer=null;this._usesAnimationFrame=false;
+        this._frame();this._startTimerLoop();
+        return;
+      }
+      this._frameWatch=setTimeout(check,Math.max(1,FRAME_START_TIMEOUT_MS-age));
+    };
+    this._frameWatch=setTimeout(check,FRAME_START_TIMEOUT_MS);
+  },
+  _startTimerLoop(){
+    this._usesAnimationFrame=false;
+    const scheduledInterval=this._frameIntervalMs;
+    const draw=()=>{
+      if(!this._visible||this._usesAnimationFrame)return;
+      this._frame();
+      if(this._timer!=null&&Math.abs(this._frameIntervalMs-scheduledInterval)>0.1){
+        clearInterval(this._timer);this._timer=null;this._startTimerLoop();
+      }
+    };
+    this._timer=setInterval(draw,scheduledInterval);
   },
   _stopLoop(){
     if (this._frameWatch != null) clearTimeout(this._frameWatch);
@@ -209,7 +233,7 @@ export default {
       const model = session.model(state);
       if(menu)model.menu=menu;
       model.resultAction = this._resultAction;
-      model.leaderboard = {...this._leaderboard,songs:session.courses};
+      if(mode==='leaderboard')model.leaderboard={...this._leaderboard,songs:session.courses};
       model.leaderboardConfigured = !!this._leaderboardClient;
       model.showMotionDebug = MOTION_DIAGNOSTICS;
       model.perf = mode === 'playing' || mode === 'paused' ? (this._perf?.out ?? null) : null;
@@ -229,9 +253,8 @@ export default {
       this._lastFrameKey = key;
       if (measureFrame) this._recordFrameTiming(startedAt, renderStartedAt, performance.now());
       if (MOTION_DIAGNOSTICS) this._sendResearch(startedAt);
-      // Back off when a frame costs too much (screen recording roughly doubles it)
-      // and come back up when the host has headroom again. Never stretch game time.
-      this._frameIntervalMs = nextFrameInterval(this._frameIntervalMs, performance.now() - startedAt);
+      // Cadence changes only after sustained load; game time remains monotonic.
+      this._frameIntervalMs = this._framePacer.observe(performance.now() - startedAt);
     } catch (e) {
       this._stopLoop();
       console.error('[rhythm] frame', String(e));
@@ -293,6 +316,7 @@ export default {
   _stopSensors(){
     for(const item of this._sensors)this._releaseSensor(item);
     this._sensors=[];
+    this._sensorClock?.reset();
     // Clear the live camera sample. Session verifies the saved reference with fresh IMU readings.
     this._head?.reset();this._headSupported=false;this._poseValid=null;
   },
@@ -340,7 +364,7 @@ export default {
       const id = crypto.randomUUID();
       const meta = {...start,id,source:'imu',startedAtMs:arrivalMs,wallTimeMs:Date.now(),requestedHz:50,
         rawTraceIntervalMs:this._rawTraceIntervalMs,
-        clocks:{arrivalMs:'performance.now milliseconds',clockMs:'performance.now milliseconds',elapsedMs:'game milliseconds, pause excluded',sensorTimestamp:'host-raw-unverified'},
+        clocks:{arrivalMs:'performance.now milliseconds',clockMs:'performance.now milliseconds',sampleClockMs:'sensor timestamp mapped to performance.now',elapsedMs:'game milliseconds, pause excluded',sensorTimestamp:'host monotonic, unit learned from adjacent samples'},
         groundTruth:'not-labelled',accelerometerUnits:'host-raw-unverified',gyroscopeAvailable:typeof Gyroscope==='function',
         absoluteOrientationAvailable:typeof AbsoluteOrientationSensor==='function'};
       this._researchRunId = id;
@@ -375,11 +399,18 @@ export default {
     if(this._sensors.some(item=>item.kind==='acceleration'))return;
     try{
       if(typeof Accelerometer!=='function')throw new Error('Accelerometer unavailable');
+      this._sensorClock.reset();
       const accel=new Accelerometer({frequency:50});
       const read=()=>{
-        const orientationAgeMs=performance.now()-this._head.latestAt;
+        const arrivalMs=performance.now();
+        const timing=this._sensorClock.map(accel.timestamp,arrivalMs);
+        if(!timing.fresh)return;
+        const orientationAgeMs=arrivalMs-this._head.latestAt;
         const quaternion=orientationAgeMs<=ORIENTATION_MAX_AGE_MS?this._head.latest:null;
-        this._session.sample({accel:{x:accel.x,y:accel.y,z:accel.z,sensorTimestamp:accel.timestamp},quaternion,orientationAgeMs});
+        this._session.sample({
+          accel:{x:accel.x,y:accel.y,z:accel.z,sensorTimestamp:accel.timestamp},
+          quaternion,orientationAgeMs,clockMs:timing.clockMs,timestampSource:timing.source,
+        });
         if(this._resumePending&&this._session.lastSample!==null){
           this._resumePending=false;
           this._session.confirm().catch(e=>{this._session.message='声音暂不可用，单击重试';console.warn('[rhythm] resume',String(e));});

@@ -36,9 +36,11 @@ function calibrationPhase(hint = '') {
 export class Session {
   constructor({ audio = null, clock = null, onResult = () => {}, onTrace = null,
     tutorialComplete = false, onTutorialComplete = () => {}, onTutorialRepeat = () => {}, requireUpright = false,
-    rawTraceIntervalMs = 0, audioOffsetMs = 0 } = {}) {
+    rawTraceIntervalMs = 0, displayOffsetMs = 0 } = {}) {
     this.audio = audio;
-    this.clock = clock || (() => audio ? audio.now() : performance.now());
+    // Gameplay owns one monotonic clock. AudioContext and native player clocks
+    // are output mechanisms; neither is allowed to move judgement time.
+    this.clock = clock || (() => performance.now());
     this.onResult = onResult;
     this.courses = spatialCourses(getCourses()); this.selected = 0; this.mode = 'home'; this.source = 'keyboard';
     this.body = new BodyState({ enableDuck: ENABLE_DUCK }); this.message = ''; this.saved = ''; this.generation = 0;
@@ -52,10 +54,8 @@ export class Session {
     this.tutorialComplete = tutorialComplete; this.onTutorialComplete = onTutorialComplete; this.tutorial = null;
     this.onTutorialRepeat = onTutorialRepeat;
     this.weakJumps = 0;
-    // The recording starts when seek+play returns, not when the beat is audible.
-    // A positive offset moves the chart origin later so the visible downbeat and
-    // the audible one coincide; it is a calibration value, never a hidden delay.
-    this.audioOffsetMs = Number.isFinite(audioOffsetMs) ? Math.max(0, Math.min(600, audioOffsetMs)) : 0;
+    this.displayOffsetMs = Number.isFinite(displayOffsetMs)
+      ? Math.max(-250, Math.min(250, displayOffsetMs)) : 0;
     this._phase = null;
   }
   trace(type, data = {}, now) {
@@ -205,7 +205,10 @@ export class Session {
   // One sensor reading: { accel } and/or { pose }. Either may be missing; the
   // posture estimate keeps whatever it last knew.
   sample(reading = {}) {
-    const now = this.clock();
+    const arrivalNow = this.clock();
+    // SensorClock maps the host timestamp onto the same monotonic clock. Use
+    // arrival time for liveness and the capture time for motion/judgement.
+    const now = Number.isFinite(reading.clockMs) ? Math.min(arrivalNow, reading.clockMs) : arrivalNow;
     // Adapters may hand in a bare accelerometer reading; normalise it.
     if (!reading.accel && [reading.x, reading.y, reading.z].every(Number.isFinite)) {
       reading = { accel: reading };
@@ -213,37 +216,39 @@ export class Session {
     if (reading.accel) {
       const { x, y, z, sensorTimestamp } = reading.accel;
       const valid = [x, y, z].every(Number.isFinite);
-      if (this._traceOpen && now - (this._lastImuTrace ?? -Infinity) >= this.rawTraceIntervalMs) {
-        this._lastImuTrace = now;
+      if (this._traceOpen && arrivalNow - (this._lastImuTrace ?? -Infinity) >= this.rawTraceIntervalMs) {
+        this._lastImuTrace = arrivalNow;
         this.trace('imu', {
           sensor: 'accelerometer', axes: [x, y, z], sensorTimestamp: sensorTimestamp ?? null, valid,
+          sampleClockMs: now, inputDelayMs: Math.max(0, arrivalNow - now),
+          timestampSource: reading.timestampSource ?? 'arrival',
           quaternion: reading.quaternion ?? null,
           orientationAgeMs: Number.isFinite(reading.orientationAgeMs) ? reading.orientationAgeMs : null,
-        }, now);
+        }, arrivalNow);
       }
       if (!valid) return this.lastState;
-      this.lastSample = now;
+      this.lastSample = arrivalNow;
       if (this.source === 'imu') {
         const checking = this.mode === 'calibrating';
         const quaternion = checking ? normalizeQuaternion(reading.quaternion) : reading.quaternion;
-        this._checkImuContinuity(now);
+        this._checkImuContinuity(arrivalNow);
         const timestamp = Number.isFinite(sensorTimestamp) ? sensorTimestamp : null;
         if (quaternion && (timestamp === null || timestamp !== this._lastPairSensorTimestamp)) {
-          this._lastPairAt = now;
+          this._lastPairAt = arrivalNow;
           this._lastPairSensorTimestamp = timestamp;
           if (checking) {
             this._lastQuat = quaternion;
-            this._sampleNeutral({ x, y, z }, quaternion, now);
+            this._sampleNeutral({ x, y, z }, quaternion, arrivalNow);
           }
         }
       }
     }
-    if (this._traceOpen && reading.pose && now - (this._lastPoseTrace ?? -Infinity) >= Math.max(200, this.rawTraceIntervalMs)) {
-      this._lastPoseTrace = now;
+    if (this._traceOpen && reading.pose && arrivalNow - (this._lastPoseTrace ?? -Infinity) >= Math.max(200, this.rawTraceIntervalMs)) {
+      this._lastPoseTrace = arrivalNow;
       this.trace('pose', {
         yaw: reading.pose.yaw ?? null, pitch: reading.pose.pitch ?? null,
         roll: reading.pose.roll ?? null, valid: reading.pose.valid !== false,
-      }, now);
+      }, arrivalNow);
     }
     const priorJump = this.body.lastJump;
     this.lastState = this.body.sample(reading, now);
@@ -360,12 +365,15 @@ export class Session {
     this.calibrationStep = null;
     this.body.calibrate(now);
     this.lastState = this.body.snapshot(now);
-    // The tutorial has no recording, so it never waits for an audible downbeat.
-    this.game.start(now + (this.tutorial ? 0 : this.audioOffsetMs));
     this.mode = this.tutorial ? 'tutorial' : 'playing';
+    let audioStart = null;
     if (this.tutorial) this.audio?.stopMusic?.();
-    else this.audio?.startMusic?.(0);
-    this.trace('state', { state: this.mode, posture: this.lastState, audioOffsetMs: this.audioOffsetMs, chartOriginMs: this.game.origin }, now);
+    else audioStart = this.audio?.startMusic?.(0) ?? null;
+    const submittedAt = this.clock();
+    const chartOrigin = Number.isFinite(audioStart?.audibleAtMs)
+      ? Math.max(submittedAt, audioStart.audibleAtMs) : submittedAt;
+    this.game.start(submittedAt, chartOrigin - submittedAt);
+    this.trace('state', { state: this.mode, posture: this.lastState, chartOriginMs: chartOrigin, audioStart }, submittedAt);
   }
 
   _queueTutorialCue(now) {
@@ -483,12 +491,18 @@ export class Session {
       const now = this.clock();
       this.body.consume(this.body.lateralMove?.action, now);
       this.lastState = this.body.snapshot(now);
-      this.game.resume(now); this.mode = this._pausedMode; this.message = '';
+      const pausedElapsedMs = this.game.time(now);
+      this.mode = this._pausedMode; this.message = '';
+      let audioStart = null;
       if (this.mode === 'tutorial') {
         if (this.tutorial.jump) this.tutorial.jump = new TutorialJump();
         this.audio?.stopMusic?.();
-      } else this.audio?.startMusic?.(this.game.time(this.clock()));
-      this.trace('state', { state: 'resumed' });
+      } else audioStart = this.audio?.startMusic?.(pausedElapsedMs) ?? null;
+      const submittedAt = this.clock();
+      const resumeAt = Number.isFinite(audioStart?.audibleAtMs)
+        ? Math.max(submittedAt, audioStart.audibleAtMs) : submittedAt;
+      this.game.resume(submittedAt, resumeAt - submittedAt);
+      this.trace('state', { state: 'resumed', resumeAtMs: resumeAt, audioStart }, submittedAt);
       this.audio && (this.audio.lastBeat = -1);
     }
   }
@@ -508,6 +522,7 @@ export class Session {
     const now = this.clock();
     return {
       mode: this.mode, courses: this.courses, selected: this.selected, state: state ?? this.game?.snapshot(now), now,
+      displayOffsetMs: this.displayOffsetMs,
       countdown: Math.max(0, 3 - (now - this.countAt) / 1000), message: this.message, source: this.source,
       tutorialComplete: this.tutorialComplete,
       calibrationReady: this.calibrationReady,
@@ -525,7 +540,9 @@ export class Session {
           hint: this._phase ? this._phase.hint : '',
         }
         : null,
-      saved: this.saved, hit: this.lastHit, body: this.lastState, posture: this.postureShare(),
+      saved: this.saved, hit: this.lastHit, body: this.lastState,
+      // Posture aggregation allocates; only the result screen consumes it.
+      posture: this.mode === 'result' ? this.postureShare() : null,
     };
   }
   // Share of frames spent in each posture, as whole percents. Visible on the

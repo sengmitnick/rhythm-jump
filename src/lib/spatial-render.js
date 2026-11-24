@@ -167,7 +167,7 @@ function tunnel(c, camera, t, bpm) {
 
   // Beat pulses travel along the floor toward the pads and keep the corridor
   // readable when the player looks down at their feet.
-  const ribs = [];
+  const ribs = tunnelRibs;
   c.beginPath();
   for (let i = 0; i < 4; i++) {
     const p = ((i / 4 + phase / 4) % 1 + 1) % 1;
@@ -175,7 +175,8 @@ function tunnel(c, camera, t, bpm) {
     if (z > TUNNEL_FAR) continue;
     const left = projectWorld([-2.4, FLOOR, z], camera);
     const right = projectWorld([2.4, FLOOR, z], camera);
-    ribs.push({ z, left, right });
+    const rib = ribs[i];
+    rib.z = z; rib.left = left; rib.right = right;
     if (left && right) { c.moveTo(left.x, left.y); c.lineTo(right.x, right.y); }
   }
   strokePath(c, C.guide, 0.9);
@@ -190,6 +191,8 @@ function tunnel(c, camera, t, bpm) {
   }
   strokePath(c, C.trace, 0.8);
 }
+
+const tunnelRibs = Array.from({ length: 4 }, () => ({ z: 0, left: null, right: null }));
 
 // ----------------------------------------------------------- pads / notes
 // Reuse the same silhouette on the floor and on the approaching note. The two
@@ -229,7 +232,11 @@ function pads(c, camera, activeLane, focusedLane) {
   const railRight = projectWorld([LANE_SPACING + 0.44, PAD_Y, railZ], camera);
   if (railLeft && railRight) line(c, [[railLeft.x, railLeft.y], [railRight.x, railRight.y]], C.guide, 1.2);
 
-  const outlines = LIVE_LANES.map(lane => lane === focusedLane ? null : screenPolygon(c, PAD_CORNERS[lane], camera));
+  const outlines = padOutlines;
+  for (let index = 0; index < LIVE_LANES.length; index++) {
+    const lane = LIVE_LANES[index];
+    outlines[index] = lane === focusedLane ? null : screenPolygon(c, PAD_CORNERS[lane], camera);
+  }
   c.beginPath();
   for (const corners of outlines) {
     if (corners) { addPolyline(c, corners); c.closePath(); }
@@ -248,6 +255,8 @@ function pads(c, camera, activeLane, focusedLane) {
   }
   strokePath(c, C.frame, 0.85);
 }
+
+const padOutlines = new Array(LIVE_LANES.length);
 
 function judgementZones(c, event, delta, camera) {
   const active = JUDGEMENT_ZONES.findIndex(zone => Math.abs(delta) <= zone.window);
@@ -426,6 +435,14 @@ function obstacle(c, event, delta, camera) {
 // Reused per-frame scratch list. A beam at cue time can be nearer than a note
 // that arrives later, so draw order follows current depth, not chart order.
 const visibleEvents = [];
+const visibleEventPool = [];
+
+function queueVisibleEvent(event, delta, z) {
+  const index = visibleEvents.length;
+  const item = visibleEventPool[index] || (visibleEventPool[index] = {});
+  item.event = event; item.delta = delta; item.z = z;
+  visibleEvents.push(item);
+}
 
 function events(c, state, t, camera) {
   visibleEvents.length = 0;
@@ -436,9 +453,9 @@ function events(c, state, t, camera) {
     if (state.done.has(event.id) || !actionEnabled(event.action)) continue;
     if (event.kind === 'wall') {
       const z = obstacleDepth(delta);
-      if (z >= 0.35) visibleEvents.push({ event, delta, z });
+      if (z >= 0.35) queueVisibleEvent(event, delta, z);
     } else if (laneEnabled(event.lane)) {
-      visibleEvents.push({ event, delta, z: noteDepth(delta, event.lane) });
+      queueVisibleEvent(event, delta, noteDepth(delta, event.lane));
     }
   }
   visibleEvents.sort((a, b) => b.z - a.z);
@@ -619,13 +636,15 @@ const MENU_MODULES = {
 function menuRoom(c, cursor) {
   const pose = cursor ? { yaw: (cursor.x - 298) / 405, pitch: (175 - cursor.y) / 365 } : null;
   const camera = createStageCamera(pose, MENU_CAMERA);
+  c.beginPath();
   const rail = (a, b) => {
     const start = projectWorld(a, camera), end = projectWorld(b, camera);
-    if (start && end) line(c, [[start.x, start.y], [end.x, end.y]], C.trace, 0.8);
+    if (start && end) { c.moveTo(start.x, start.y); c.lineTo(end.x, end.y); }
   };
   for (const x of [-3.1, -1.55, 0, 1.55, 3.1]) rail([x, FLOOR, 2.4], [x, FLOOR, 7.5]);
   for (const z of [3.2, 4.4, 6, 7.5]) rail([-3.1, FLOOR, z], [3.1, FLOOR, z]);
   for (const x of [-3.1, 3.1]) rail([x, FLOOR, 7.5], [x, 1.2, 7.5]);
+  strokePath(c, C.trace, 0.8);
 }
 
 function menuPanel(c, { x, y, w, h }, active, selected) {
@@ -672,8 +691,8 @@ function menuModule(c, target, active) {
   const { title, detail } = MENU_MODULES[focus];
   const iconColor = active ? C.bright : C.frame;
   menuPanel(c, target, active, false);
-  text(c, title, x + 16, y + 27, 17, active ? C.bright : C.text);
-  text(c, detail, x + 16, y + 45, 10, active ? C.text : C.secondary);
+  text(c, title, x + 16, y + 27, 17, active ? C.bright : C.text, 'left', false, w - 54);
+  text(c, detail, x + 16, y + 45, 10, active ? C.text : C.secondary, 'left', false, w - 54);
   const ix = x + w - 23, iy = y + 26;
   if (focus === 'leaderboard') {
     for (const [dx, height] of [[-5, 7], [0, 12], [5, 5]]) line(c, [[ix + dx, iy], [ix + dx, iy - height]], iconColor, 2.1);
@@ -941,8 +960,12 @@ export function renderSpatial(c, model = {}) {
     if (model.perf?.text) text(c, model.perf.text, 240, 246, 8, C.secondary, 'center');
   } else if (state) {
     const t = state.elapsedMs, bpm = state.course?.bpm || 108;
+    const offset = Number.isFinite(model.displayOffsetMs) ? Math.max(-250, Math.min(250, model.displayOffsetMs)) : 0;
+    // Advance only predictive visuals. Judgement, score, HUD progress and the
+    // age of an already-triggered hit stay on the real chart clock.
+    const visualT = Math.max(0, Math.min(state.course?.durationMs ?? Infinity, t + offset));
     const camera = createStageCamera(model.pose);
-    stage(c, state, t, bpm, camera, model.body);
+    stage(c, state, visualT, bpm, camera, model.body);
     feedback(c, state, t, camera);
     hud(c, state);
     if (model.showMotionDebug === true) motionDebugHud(c, model.body);

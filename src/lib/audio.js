@@ -2,18 +2,31 @@
 // hosts, so the music is built from the same beat grid the chart uses.
 const SCALE = [0, 3, 5, 7, 10];
 
+// Engineering starting point, not a device measurement: allow roughly three
+// 20 ms decode/output quanta plus one 60 Hz presentation interval, rounded from
+// ~77 ms. Device video/loopback evidence should tune this per host.
+export const DEFAULT_AUDIO_OFFSET_MS = 80;
+const MAX_AUDIO_OFFSET_MS = 500;
+
+export function normalizeAudioOffsetMs(value) {
+  if (!Number.isFinite(value)) return DEFAULT_AUDIO_OFFSET_MS;
+  return Math.max(0, Math.min(MAX_AUDIO_OFFSET_MS, value));
+}
+
 function disposePlayer(player) {
   try { player.stop(); } catch { /* already stopped */ }
   try { player.destroy(); } catch { /* already released */ }
 }
 
 export class RhythmAudio {
-  constructor(Context, AudioPlayer = null) {
+  constructor(Context, AudioPlayer = null, { clock = null, audioOffsetMs } = {}) {
     this.Context = Context; this.AudioPlayer = AudioPlayer;
+    this.clock = typeof clock === 'function' ? clock : () => performance.now();
+    this.audioOffsetMs = normalizeAudioOffsetMs(audioOffsetMs);
     this.context = null; this.lastBeat = -1; this.volume = 0.17;
     this.voices = []; this.voiceIndex = 0; this.root = 220; this.mood = 0; this.lastCountdown = -1;
     this.trackSrc = null; this.trackLoop = false; this.trackDurationMs = 0; this.player = null;
-    this.preview = null;
+    this.preview = null; this.playbackTiming = null;
   }
   // A course may carry its own recording. When it does, the recording is the
   // beat grid: the clock follows it and the chart is authored on its bars.
@@ -56,23 +69,42 @@ export class RhythmAudio {
   now() {
     // Recorded courses use the monotonic clock, even if native playback fails
     // after a chart has started and the synth needs to take over.
-    if (this.trackSrc && this.AudioPlayer) return performance.now();
-    return this.context ? this.context.currentTime * 1000 : performance.now();
+    if (this.trackSrc && this.AudioPlayer) return this.clock();
+    return this.context ? this.context.currentTime * 1000 : this.clock();
   }
-  startMusic(offsetMs = 0) {
+  startMusic(positionMs = 0) {
     this.stopPreview();
     const player = this.player;
-    if (!player) return;
-    const positionMs = this.trackLoop && this.trackDurationMs > 0 ? offsetMs % this.trackDurationMs : offsetMs;
+    if (!player) return null;
+    const seekMs = this.trackLoop && this.trackDurationMs > 0 ? positionMs % this.trackDurationMs : positionMs;
+    // Mark both sides of the native bridge. `submittedAtMs` excludes synchronous
+    // seek/play cost from the chart, while audioOffsetMs estimates the remaining
+    // decoder/output delay before the first sample is actually audible.
+    const requestedAtMs = this.now();
     try {
-      player.seek(positionMs / 1000);
-      if (this.player === player) player.play()?.catch?.(() => this.stopMusic(player));
-    } catch { this.stopMusic(player); }
+      player.seek(Math.max(0, seekMs) / 1000);
+      if (this.player !== player) return null;
+      const pending = player.play();
+      const submittedAtMs = this.now();
+      const timing = this.playbackTiming = {
+        requestedAtMs,
+        submittedAtMs,
+        commandMs: Math.max(0, submittedAtMs - requestedAtMs),
+        audioOffsetMs: this.audioOffsetMs,
+        audibleAtMs: submittedAtMs + this.audioOffsetMs,
+        positionMs: Math.max(0, seekMs),
+      };
+      pending?.catch?.(() => this.stopMusic(player));
+      return timing;
+    } catch {
+      this.stopMusic(player);
+      return null;
+    }
   }
   stopMusic(player = this.player) {
     if (!player || this.player !== player) return;
     // prepare() will recreate the decoder if the round resumes.
-    this.player = null;
+    this.player = null; this.playbackTiming = null;
     disposePlayer(player);
   }
   startPreview(course) {
@@ -81,7 +113,7 @@ export class RhythmAudio {
     this.stopMusic();
     try {
       const player = new this.AudioPlayer();
-      this.preview = { player, startedAt: performance.now(), durationMs: course.previewDurationMs };
+      this.preview = { player, startedAt: this.clock(), durationMs: course.previewDurationMs };
       const release = () => this.stopPreview(player);
       player.loop = false;
       player.onEnded?.(release);
@@ -101,7 +133,7 @@ export class RhythmAudio {
   }
   previewState() {
     if (this.preview) {
-      const elapsedMs = performance.now() - this.preview.startedAt;
+      const elapsedMs = this.clock() - this.preview.startedAt;
       if (elapsedMs < this.preview.durationMs) {
         return { playing: true, progress: elapsedMs / this.preview.durationMs };
       }

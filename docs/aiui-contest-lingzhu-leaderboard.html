@@ -70,26 +70,18 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
 <div class="layout">
   <nav class="toc" aria-label="目录">
     <strong>目录</strong>
-    <a class="lv2" href="#一-先把需求翻译成后端契约">一、先把需求翻译成后端契约</a>
-    <a class="lv2" href="#二-为什么用灵珠-而不是自建服务">二、为什么用灵珠，而不是自建服务</a>
-    <a class="lv2" href="#三-数据建模">三、数据建模</a>
-    <a class="lv2" href="#四-工作流-校验在前-查询在后-包装统一">四、工作流：校验在前，查询在后，包装统一</a>
-    <a class="lv3" href="#4-1-代码-a-到底校验什么">4.1 代码 A 到底校验什么</a>
-    <a class="lv3" href="#4-2-代码-b-榜单是在-窗口内-算的">4.2 代码 B：榜单是在「窗口内」算的</a>
-    <a class="lv2" href="#五-协议-一个小而完整的信封">五、协议：一个小而完整的信封</a>
-    <a class="lv2" href="#六-aix-客户端-流式回包比文档难伺候">六、AIX 客户端：流式回包比文档难伺候</a>
-    <a class="lv2" href="#七-最疼的坑-rw-mode">七、最疼的坑：<code>rw_mode</code></a>
-    <a class="lv3" href="#7-1-现象">7.1 现象</a>
-    <a class="lv3" href="#7-2-原因">7.2 原因</a>
-    <a class="lv3" href="#7-3-修改纪律">7.3 修改纪律</a>
-    <a class="lv2" href="#八-信任边界-能排名-不代表分数可信">八、信任边界：能排名，不代表分数可信</a>
-    <a class="lv2" href="#九-智能体-id-不进仓库">九、智能体 ID 不进仓库</a>
-    <a class="lv2" href="#十-验证-哪些是自动化的-哪些还没做">十、验证：哪些是自动化的，哪些还没做</a>
-    <a class="lv3" href="#10-1-可重复的部分">10.1 可重复的部分</a>
-    <a class="lv3" href="#10-2-还不能声称的">10.2 还不能声称的</a>
-    <a class="lv2" href="#十一-想在自己的-aiui-项目里复用-照着这张清单做">十一、想在自己的 AIUI 项目里复用，照着这张清单做</a>
-    <a class="lv2" href="#十二-复盘">十二、复盘</a>
-    <a class="lv2" href="#十三-开源与素材">十三、开源与素材</a>
+    <a class="lv2" href="#先想清楚接口">先想清楚接口</a>
+    <a class="lv2" href="#两张表">两张表</a>
+    <a class="lv2" href="#工作流怎么排">工作流怎么排</a>
+    <a class="lv2" href="#代码-a-到底拦了什么">代码 A 到底拦了什么</a>
+    <a class="lv2" href="#回包是流-不是-json">回包是流，不是 JSON</a>
+    <a class="lv2" href="#那个-rw-mode">那个 <code>rw_mode</code></a>
+    <a class="lv2" href="#分数其实不可信">分数其实不可信</a>
+    <a class="lv2" href="#bot-id-不进仓库">Bot ID 不进仓库</a>
+    <a class="lv2" href="#测了什么-没测什么">测了什么，没测什么</a>
+    <a class="lv2" href="#想抄的话-按这个顺序">想抄的话，按这个顺序</a>
+    <a class="lv2" href="#还没做的">还没做的</a>
+    <a class="lv2" href="#仓库">仓库</a>
     <a class="lv2" href="#作者提交前核对项">作者提交前核对项</a>
   </nav>
   <article>
@@ -99,51 +91,46 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
       <a class="pill" href="https://github.com/sengmitnick/rhythm-jump">源码仓库</a>
       <a class="pill" href="https://github.com/sengmitnick/rokid-lingzhu-backend">灵珠后端技能</a>
     </div>
-    <h1>用灵珠工作流当 AIUI 应用的后端：跨账号共享排行榜实战</h1>
+    <h1>灵珠当后端：给 AIUI 应用做一张跨账号排行榜</h1>
 <blockquote><p>征文活动：<a href="https://forum.rokid.com/post/detail/3911">AIUI 十二月征文计划</a></p><p>开源仓库：<a href="https://github.com/sengmitnick/rhythm-jump">https://github.com/sengmitnick/rhythm-jump</a></p><p>配套技能：<a href="https://github.com/sengmitnick/rokid-lingzhu-backend">rokid-lingzhu-backend</a></p><p>智能体名称：节奏开跳　｜　AIUI ID：【真实 AIUI ID】　｜　上架状态：【未提交 / 审核中 / 已上架，附真实链接】</p></blockquote>
-<p>AIUI 应用没有自带服务器。一旦需求从「本机跑起来」变成「把成绩存到云上、按账号排名、换个人登录还能看到别人的分」，就必须有后端。</p>
-<p>这篇文章只讲一件事：<strong>怎么用灵珠（数据表 + 工作流 + API 智能体）把一个跨账号共享排行榜做完，并且踩过的坑都写清楚。</strong></p>
-<p>示例项目是体感节奏游戏「节奏开跳」——但游戏本身怎么判定动作不在本文范围，这里只把它当成一个「每局结束时产出一条成绩」的客户端。换个应用，只要你的服务端契约同样是「提交一条成绩 / 读一个榜」，这套做法可以直接搬走。</p>
-<p><img alt="排行榜页面：读取中、正常榜单、未配置离线态与结算名次（测试数据）" src="images/leaderboard.png" loading="lazy"></p>
-<hr>
-<h2 id="一-先把需求翻译成后端契约">一、先把需求翻译成后端契约</h2>
-<p>排行榜看起来简单，实际要回答五个问题：</p>
-<div class="table-wrap"><table><thead><tr><th>问题</th><th>本项目的答案</th></tr></thead><tbody><tr><td>一条成绩包含什么？</td><td>谁、哪首歌、哪个谱面版本、多少分、什么时候打的</td></tr><tr><td>榜怎么切？</td><td>每个 <code>song_id + chart_version</code> 一个榜</td></tr><tr><td>重复提交怎么办？</td><td>每人只取最高分；同分按最早达成</td></tr><tr><td>没登录 / 没网怎么办？</td><td>本地先存，云端失败只做提示，不阻塞结算</td></tr><tr><td>分数可信吗？</td><td>客户端上报，服务端只做结构校验；不用于发奖</td></tr></tbody></table></div>
-<p>翻译成接口就两个操作：</p>
-<pre class="code lang-text"><code>score.submit      提交一局成绩，返回本人名次
-leaderboard.list  读某一首歌某个谱面版本的全时段榜</code></pre>
-<p>注意这里没有「注册用户」这个操作：AIUI 宿主已经能给出账号，后端不该再让用户填一遍昵称。</p>
-<h2 id="二-为什么用灵珠-而不是自建服务">二、为什么用灵珠，而不是自建服务</h2>
-<p>自建 Node + PostgreSQL 当然可行（这个项目早期就有一版），但对个人开发者有三个现实问题：要买服务器、要配域名证书、要自己处理账号体系和合规。</p>
-<p>灵珠给的是现成三件套：</p>
-<div class="table-wrap"><table><thead><tr><th>能力</th><th>在本项目里的角色</th></tr></thead><tbody><tr><td>数据表</td><td>存用户快照和成绩流水</td></tr><tr><td>工作流</td><td>校验、去重、排序、算名次；用代码节点写业务逻辑</td></tr><tr><td>API 智能体</td><td>给 AIX 一个可调用的入口，<code>api.agent.invokeAgentApi</code> 直连</td></tr></tbody></table></div>
-<p>代价也要说清楚：</p>
-<ul><li>它不是通用 REST 后端，请求要套进「智能体对话」的形式；</li><li>回包是<strong>流式文本</strong>，不是标准 JSON Body，解析要按真实时序写；</li><li>数据表有平台级权限模型（后面 <code>rw_mode</code> 那一节就是这个坑）；</li><li>查询能力有限，本项目只能「取最近 100 行再在代码里排序」。</li></ul>
-<p><strong>结论：适合中小规模排行榜、原型验证和教学示例；不适合高并发、强一致、需要防作弊的正式赛事。</strong></p>
-<h2 id="三-数据建模">三、数据建模</h2>
-<p>两张表，职责分开：</p>
-<div class="table-wrap"><table><thead><tr><th>表</th><th>作用</th><th>关键字段</th></tr></thead><tbody><tr><td><code>rhythm_user</code></td><td>用户快照</td><td><code>user_id</code>、<code>display_name</code>、<code>created_at</code>、<code>updated_at</code></td></tr><tr><td><code>rhythm_score</code></td><td>成绩流水，一次结算一行</td><td><code>run_id</code>、<code>user_id</code>、<code>display_name</code>、<code>song_id</code>、<code>song_title</code>、<code>chart_version</code>、<code>score</code>、<code>accuracy</code>、<code>max_combo</code>、<code>perfect</code>、<code>good</code>、<code>miss</code>、<code>played_at</code>、<code>score_basis</code></td></tr></tbody></table></div>
-<p>完整字段（含平台系统字段）见 <a href="backend/v1/tables.csv">backend/v1/tables.csv</a>，可直接照着重建。</p>
-<p>四个建模决定，事后看都是必要的：</p>
-<p><strong>1. 分榜键带上谱面版本。</strong> 谱面改了判定标准就变了，用 <code>chart_version</code> 把旧分留在旧榜里，避免「改谱之后历史成绩突然全部作废」这种最伤玩家的事。</p>
-<p><strong>2. 显示名存快照。</strong> <code>rhythm_score.display_name</code> 是提交当时的昵称，用户后来改名不会改历史榜。代价是同一人不同名，但比「榜单里名字突然全变」可接受。</p>
-<p><strong>3. 时间用服务端时间。</strong> <code>played_at</code> 由代码节点 <code>time.time()</code> 写入，不信任客户端时钟；同分排名要依赖它，必须可信。</p>
-<p><strong>4. 把信任级别写进字段。</strong> <code>score_basis</code> 固定为 <code>client_reported</code>。这不是装饰，是让后来接手的人一眼看到「这个分数是客户端说的」。</p>
-<h2 id="四-工作流-校验在前-查询在后-包装统一">四、工作流：校验在前，查询在后，包装统一</h2>
-<pre class="code lang-text"><code>开始(USER_INPUT)
- └→ 代码 A：解析 / 校验（node_dispatch.py）
+<p>做这个排行榜之前，我以为最难的是排序。</p>
+<p>结果第一版上线，两个账号各自提交成绩都成功，换台设备登录，榜单里只剩自己。查了半天 SQL，条件写得干干净净，就是没有 <code>user_id</code> 过滤。后来才发现问题根本不在查询语句，而在那张表的权限模式：平台按调用者把记录隔离了，工作流再怎么查都只看得见自己那份。</p>
+<p>这篇文章记录的就是这一路的活：AIUI 应用没有服务器，怎么用灵珠把成绩存下来、排出来、让两个真实账号互相看得见。游戏是体感节奏游戏「节奏开跳」，但它在这里只是"每局结束产生一条成绩"的客户端，动作怎么判定不在本文范围。</p>
+<p><img alt="排行榜的四个状态：正常榜单、结算名次、读取中、未配置（测试数据）" src="images/leaderboard.png" loading="lazy"></p>
+<h2 id="先想清楚接口">先想清楚接口</h2>
+<p>排行榜需求拆开其实就两件事：交一条成绩，看一个榜。所以接口也只有两个：</p>
+<pre class="code lang-text"><code>score.submit      提交一局，返回本人名次
+leaderboard.list  读某首歌某个谱面版本的榜</code></pre>
+<p>不设"注册用户"。AIUI 宿主已经能给出账号，后端不该再让玩家填一遍昵称——这是我在旧版自建服务里踩过的坑，多一道注册，就多一处流失和一处对不上的身份。</p>
+<h2 id="两张表">两张表</h2>
+<pre class="code lang-text"><code>rhythm_user    user_id, display_name, created_at, updated_at
+rhythm_score   run_id, user_id, display_name, song_id, song_title,
+               chart_version, score, accuracy, max_combo,
+               perfect, good, miss, played_at, score_basis</code></pre>
+<p>字段清单（含平台系统字段）在 <a href="backend/v1/tables.csv">backend/v1/tables.csv</a>，照着建就能跑。</p>
+<p>几个当时纠结过的点：</p>
+<p>分榜键要带谱面版本。一开始只有 <code>song_id</code>，后来改谱，判定线全变了，旧成绩混在新标准里，玩家一看就会骂。加上 <code>chart_version</code> 之后，改谱等于开新榜，旧分留着作纪念。</p>
+<p>显示名存快照。成绩行里存提交当时的昵称。用户改了名，历史榜单不会跟着变。副作用是同一个人可能在不同行里叫不同名字，但我们讨论后觉得，比"榜单名字突然全变"要好接受。</p>
+<p>时间用服务端的。<code>played_at</code> 是代码节点里 <code>time.time()</code> 写进去的，不信客户端时钟。同分要靠它判先后，这个字段不能用客户端给的。</p>
+<p><code>score_basis</code> 固定写 <code>client_reported</code>。一开始觉得多余，后来发现这个字段帮了大忙：任何接手的人看到这三个字，就知道分数是客户端报的，不用再解释一遍。</p>
+<h2 id="工作流怎么排">工作流怎么排</h2>
+<pre class="code lang-text"><code>开始
+ └→ 代码 A：解析、校验（node_dispatch.py）
      └→ 选择器
-         ├ score.submit      → 新增用户 → 新增成绩 → 查询本曲前 100 行 → 包装成绩
-         ├ leaderboard.list  → 查询本曲前 100 行 → 包装榜单
-         └ 否则              → 包装错误
-                                  └→ 汇总（node_merge.py）→ 结束(output)</code></pre>
-<p>三个代码节点各管一件事，边界清晰：</p>
-<ul><li><strong>代码 A</strong>：把「用户输入的那段 JSON」变成「可信的、字段已校验的 payload」。所有拒绝都发生在这里。</li><li><strong>数据节点</strong>：只做两件事——按字段值写入、按 <code>song_id + chart_version</code> 查询最近 100 行。不在节点里做业务判断。</li><li><strong>代码 B</strong>：把查询结果变成榜单——按用户去重取最高分、排序、分页、算本人名次。</li><li><strong>汇总</strong>：三个分支只有一条会产出，取第一个非空的 <code>response_json</code>。</li></ul>
-<p>这样分工的好处很实际：加一首歌只需要改代码 A 的曲目表；改排序规则只需要改代码 B；数据节点几乎不用动。</p>
-<h3 id="4-1-代码-a-到底校验什么">4.1 代码 A 到底校验什么</h3>
-<p>这是全篇最值得抄的一段，规则不多但每条都对应一种真实故障：</p>
-<div class="table-wrap"><table><thead><tr><th>校验</th><th>挡住的问题</th></tr></thead><tbody><tr><td>顶层键必须<strong>恰好</strong>是 <code>v / request_id / actor / op / data</code></td><td>客户端多塞字段、按旧版本发请求</td></tr><tr><td>JSON 重复键直接报错</td><td><code>{"score":1,"score":99999}</code> 这类解析歧义</td></tr><tr><td>请求体 ≤ 24 KB</td><td>恶意大包拖垮节点</td></tr><tr><td><code>op</code> 必须在白名单内</td><td>未定义操作被当成默认分支执行</td></tr><tr><td><code>song_id + chart_version</code> 在曲目表内</td><td>伪造曲目、旧谱面混进新榜</td></tr><tr><td><code>perfect + good + miss == notes</code></td><td>统计造假的成绩（拍数按曲目/版本查表）</td></tr><tr><td><code>max_combo &lt;= perfect + good</code></td><td>连击大于命中数</td></tr><tr><td><code>score &lt;= 1000×perfect + 500×good</code> 且 <code>0 ≤ score ≤ 1000×notes</code></td><td>秒结算、分数超上限</td></tr><tr><td>文本字段 ≤ 24 字、无控制字符、无尖括号</td><td>昵称注入和排版炸裂</td></tr><tr><td><code>accuracy</code> 不由客户端上传</td><td>准确率一律服务端按 <code>(perfect + 0.6×good) / notes</code> 计算</td></tr></tbody></table></div>
-<p>曲目表本身也很小，新增歌曲就是加一行：</p>
+         ├ score.submit     → 新增用户 → 新增成绩 → 查本曲最近 100 行 → 包装成绩
+         ├ leaderboard.list → 查本曲最近 100 行 → 包装榜单
+         └ 否则             → 包装错误
+                              └→ 汇总 → 结束</code></pre>
+<p>分工是这样的：</p>
+<p>代码 A 只干一件事——把用户输入的那段 JSON 变成可信的 payload。所有拒绝都发生在这里，后面的节点拿到的都是已经校验过的东西。</p>
+<p>数据节点尽量笨。它只按字段写、按 <code>song_id + chart_version</code> 查最近 100 行。之前试过在节点里写判断，结果改一次业务就要重连一次工作流，很烦。</p>
+<p>代码 B 负责榜单：按 <code>user_id</code> 去重取最高分，同分按 <code>played_at</code> 升序，截断到 <code>limit</code>，再算本人名次。本人掉出前几名时单独返回一条，界面上就是那句"你 · 第 11 名"。</p>
+<p>汇总节点只取第一个非空的 <code>response_json</code>，因为三个分支同时只会走通一条。</p>
+<h2 id="代码-a-到底拦了什么">代码 A 到底拦了什么</h2>
+<p>这部分是我觉得最值得直接抄的，规则不多，但每条都对应一次真实的坏数据：</p>
+<div class="table-wrap"><table><thead><tr><th>检查</th><th>挡住的东西</th></tr></thead><tbody><tr><td>顶层键必须恰好是 <code>v / request_id / actor / op / data</code></td><td>客户端多塞字段、按旧版本发请求</td></tr><tr><td>JSON 重复键直接报错</td><td><code>{"score":1,"score":99999}</code> 这种解析歧义</td></tr><tr><td>请求体不超过 24 KB</td><td>大包拖慢节点</td></tr><tr><td><code>op</code> 必须在白名单里</td><td>未定义操作走到默认分支</td></tr><tr><td>曲目和谱面版本在表内</td><td>伪造曲目、旧谱混新榜</td></tr><tr><td><code>perfect + good + miss == notes</code></td><td>统计造假的成绩</td></tr><tr><td><code>max_combo &lt;= perfect + good</code></td><td>连击大于命中数</td></tr><tr><td><code>score &lt;= 1000×perfect + 500×good</code></td><td>秒结算、分数超上限</td></tr><tr><td>昵称 24 字内、无控制字符、无尖括号</td><td>昵称注入和排版炸裂</td></tr></tbody></table></div>
+<p>准确率不由客户端上传，服务端按 <code>(perfect + 0.6×good) / notes</code> 算出来。</p>
+<p>有个坑值得单独说：<strong>拍数必须和谱面同源。</strong> 拍数写在代码 A 的曲目表里，谱面在客户端里，两边只要有一次不同步，所有成绩都会被判"统计不一致"，玩家看到的是提交失败，但代码本身没错。所以改谱必须同时发客户端和工作流，这条现在写在发版清单里。</p>
 <pre class="code lang-python"><code>SONGS = {
   'beatucada': {'title': 'Beatucada', 'duration_ms': 108475,
                 'notes_by_version': {1: 32}},
@@ -152,27 +139,8 @@ leaderboard.list  读某一首歌某个谱面版本的全时段榜</code></pre>
   'summer-overload': {'title': 'Summer Overload!', 'duration_ms': 145424,
                       'notes_by_version': {1: 55}},
 }</code></pre>
-<p><strong>一个容易忽略的点：拍数必须和谱面同源。</strong> 拍数写在代码 A 里、谱面在客户端里，两边只要有一次不同步，所有成绩都会被判「统计不一致」。改谱必须同时发客户端和工作流。</p>
-<h3 id="4-2-代码-b-榜单是在-窗口内-算的">4.2 代码 B：榜单是在「窗口内」算的</h3>
-<p>数据节点返回最近 100 行，代码 B 在这 100 行里：</p>
-<ol><li>按 <code>user_id</code> 去重，只留最高分；</li><li>同分按 <code>played_at</code> 升序（早达成者在前），再按 <code>user_id</code> 兜底稳定排序；</li><li>截断到 <code>limit</code>（1–20，默认 8）；</li><li>标记 <code>is_me</code> 并计算本人名次（本人不在前 <code>limit</code> 时单独返回一条）。</li></ol>
-<p>这意味着 <code>total_players</code> 只是「窗口内的人数」，不是全站人数。用户量真的涨起来，必须换成分页或服务端排序。这个限制写进了文档，而不是假装没有。</p>
-<h2 id="五-协议-一个小而完整的信封">五、协议：一个小而完整的信封</h2>
-<pre class="code lang-json"><code>{
-  "v": "rhythm-jump/1",
-  "request_id": "req_8f3c...",
-  "actor": { "id": "rokid_account_id", "name": "玩家" },
-  "op": "leaderboard.list",
-  "data": { "song_id": "beatucada", "chart_version": 1, "limit": 8 }
-}</code></pre>
-<p>响应形如 <code>{"v":"rhythm-jump/1","request_id":"...","ok":true,"data":{...}}</code>，失败时 <code>ok:false</code> 并带 <code>error.code / error.retryable</code>。</p>
-<p>三个细节：</p>
-<ul><li><code>request_id</code> 是为「串台」准备的。用户快速切歌时，上一首的榜可能后到；客户端只接受与当前请求匹配的回包，否则直接丢弃。</li><li><code>actor</code> 是身份，不是凭据。它来自 <code>getProfile().accountId</code>，平台没有为它签名。</li><li><code>v</code> 变动即协议不兼容，宁可报错也不要猜字段。</li></ul>
-<p>另外，工作流最终把 JSON 放在 <code>RHYTHM_RESULT</code> 前缀之后返回，灵珠部分调试入口还会再包一层 <code>{"output":"..."}</code>。客户端必须两种都能吃。</p>
-<h2 id="六-aix-客户端-流式回包比文档难伺候">六、AIX 客户端：流式回包比文档难伺候</h2>
-<p>AIX 侧就是一个函数调用，但返回的是流，真实接入时会同时遇到四种形态：</p>
-<div class="table-wrap"><table><thead><tr><th>形态</th><th>出现场景</th></tr></thead><tbody><tr><td>分段 <code>message.content</code></td><td>正常流式输出，正文被切成很多片</td></tr><tr><td>结束事件的 <code>final_answer</code></td><td>有些宿主只在结束时给完整文本</td></tr><tr><td><code>message.metadata.output</code></td><td>工作流输出变量走元数据</td></tr><tr><td>先空 <code>end</code>、正文后到</td><td>真机联调时出现过，最坑的一种</td></tr></tbody></table></div>
-<p><a href="src/lib/leaderboard-client.js">src/lib/leaderboard-client.js</a> 的处理方式：</p>
+<h2 id="回包是流-不是-json">回包是流，不是 JSON</h2>
+<p>调用的入口就一句：</p>
 <pre class="code lang-js"><code>stream = api.agent.invokeAgentApi({
   body: {
     conversation_id: this._conversationId,
@@ -180,68 +148,58 @@ leaderboard.list  读某一首歌某个谱面版本的全时段榜</code></pre>
     question: JSON.stringify(envelope)
   }
 });</code></pre>
-<ul><li>三种文本来源一起收集，任意一种能解析成功就完成；</li><li>遇到 <code>end</code> 时先给 1.5 秒宽限期（<code>END_REPLY_GRACE_MS</code>），避免「正文还在路上就判失败」；</li><li>解析前校验 <code>v</code> 与 <code>request_id</code>，再判断 <code>ok</code>；</li><li>外层 <code>{"output":"..."}</code> 只解一层，解不开就按协议错误报告，不猜；</li><li>整体 15 秒超时，流错误与解析错误分开归类，界面文案也不同。</li></ul>
-<p>这些分支听着琐碎，但每一条都对应一次真实失败。<strong>后端写得再对，客户端把回包读错，用户看到的就是「排行榜没有返回内容」。</strong></p>
-<h2 id="七-最疼的坑-rw-mode">七、最疼的坑：<code>rw_mode</code></h2>
-<h3 id="7-1-现象">7.1 现象</h3>
-<p>两个账号都能提交成绩，工作流查询语句里也确实只按 <code>song_id + chart_version</code> 过滤，但每个账号登录后<strong>只能看到自己的成绩</strong>。</p>
-<p>第一反应是去查 SQL、查排序、查去重代码——全是错的。问题在数据库表的权限模式。</p>
-<h3 id="7-2-原因">7.2 原因</h3>
-<div class="table-wrap"><table><thead><tr><th><code>rw_mode</code></th><th>模式</th><th>对共享榜的影响</th></tr></thead><tbody><tr><td><code>1</code></td><td>单用户读写（LimitedReadWrite）</td><td>平台按调用者给记录加范围，谁登录只看自己的</td></tr><tr><td><code>2</code></td><td>用户只读（ReadOnly）</td><td>玩家提交不了成绩</td></tr><tr><td><code>3</code></td><td>多用户读写（UnlimitedReadWrite）</td><td>可跨用户查询，共享榜必须用这个</td></tr></tbody></table></div>
-<p><strong><code>rw_mode</code> 是表级属性，不是工作流属性，也不是 AIX 配置。</strong> 工作流访问表时平台会应用它；查询节点没写 <code>user_id</code> 条件，不代表查询已经跨账号。</p>
-<h3 id="7-3-修改纪律">7.3 修改纪律</h3>
-<ol><li>先<strong>备份完整表配置</strong>（含字段 ID、顺序、类型、必填），不要只记一个模式值；</li><li>只改目标表：成绩表 <code>rhythm_score</code> 改成 <code>3</code>，账号资料表 <code>rhythm_user</code> 保持原权限，<strong>不做批量放开</strong>；</li><li>更新后<strong>回读</strong>，确认 <code>id</code>、表名、字段列表与备份一致（平台更新接口的响应里有些元数据是占位值，不能拿它当最终状态）；</li><li><strong>用两个真实账号验收</strong>：A、B 各自完成同一曲目，双方都能在榜里看到彼此的分数，「你」的标记跟随当前登录账号。</li></ol>
-<p>第 4 步不能省。单账号试运行、在请求 JSON 里换一个 <code>actor.id</code>、本地跑一遍排序测试，都<strong>证明不了</strong>平台的调用者隔离已经解除。</p>
-<p>本项目只把 <code>rhythm_score</code> 从 <code>1</code> 改成 <code>3</code>，回读确认 14 个业务字段未变；修复后多个账号的历史成绩在同一榜单中可见，Studio 查榜与眼镜端均确认过。完整操作步骤（含离线生成更新正文的脚本、回读核对、验收清单）整理在 <a href="docs/lingzhu-leaderboard-rw-mode.md">docs/lingzhu-leaderboard-rw-mode.md</a>，也做成了可调用技能 <a href="https://github.com/sengmitnick/rokid-lingzhu-backend">rokid-lingzhu-backend</a>。</p>
-<blockquote><p>补充一句边界：<code>rw_mode: 3</code> 给的是「能跨用户读写」的能力，不等于细粒度权限系统。本项目只开放「新增成绩」和「查询榜单」，没有修改、删除他人成绩的接口。</p></blockquote>
-<h2 id="八-信任边界-能排名-不代表分数可信">八、信任边界：能排名，不代表分数可信</h2>
-<p>服务端做了九条校验，能挡住秒结算、统计造假、超上限分数。但它挡不住：</p>
-<ul><li>修改客户端直接上报一个合法范围内的假分数；</li><li>重放一段真实成绩；</li><li>伪造 <code>actor.id</code> 冒充别人。</li></ul>
-<p>因为 <code>actor</code> 只是客户端声明，平台没有设备证明。所以：</p>
-<ul><li>榜单定位是<strong>展示与自娱</strong>，不能用于发奖；</li><li>真要办比赛，需要另做服务端验证、请求签名、防重放、可信身份链路；</li><li>这些限制写进 README 和协议文档，而不是留在开发者脑子里。</li></ul>
-<p>把「不可信」标注出来，比写一个看起来很严谨的校验函数更有价值。</p>
-<h2 id="九-智能体-id-不进仓库">九、智能体 ID 不进仓库</h2>
-<p>排行榜要一个 Bot ID。写进源码再开源，等于把自己的线上入口交出去——别人不仅能看，还能往你的表里写数据。</p>
-<p>所以仓库用「示例配置 + 本地忽略」：</p>
-<pre class="code lang-text"><code>config/service-config.example.js     ← 入库，agentId 为空
-src/lib/service-config.local.js      ← git 忽略，存真实 Bot ID
-src/lib/service-config.js            ← 运行时入口，只做再导出</code></pre>
-<pre class="code lang-bash"><code>npm run config:init   # 从示例生成本地配置；已存在则不覆盖</code></pre>
-<p>两个配套设计：</p>
-<ul><li>所有 npm 脚本（<code>check</code> / <code>test</code> / <code>pack</code> / <code>preview</code>）都会先跑 <code>config:init</code>，新克隆的仓库开箱即可检查、测试、打包，不会因为缺文件报错；</li><li>初始化<strong>永不覆盖</strong>已有文件，填好的配置在拉代码、升级后依然保留。</li></ul>
-<p><code>agentId</code> 为空时排行榜就是离线态（界面上是「排行榜未配置 · 本地成绩已保存」），本地成绩照常保存，不影响试玩。</p>
-<h2 id="十-验证-哪些是自动化的-哪些还没做">十、验证：哪些是自动化的，哪些还没做</h2>
-<h3 id="10-1-可重复的部分">10.1 可重复的部分</h3>
-<p>2026-11-24，从公开快照干净安装后：</p>
+<p>麻烦在返回。真机联调那几天，同一个接口我见到了四种回包：</p>
+<ul><li>正文 <code>message.content</code> 被切成很多片，要自己拼；</li><li>有些宿主只在结束事件里给 <code>final_answer</code>；</li><li>工作流输出变量跑到 <code>message.metadata.output</code> 去了；</li><li>最坑的一种：先来一个空的 <code>end</code>，正文过一会儿才到。</li></ul>
+<p>最后一种让我盯着日志看了半小时，因为按文档写"收到 end 就结束"，收到的永远是空。现在的做法是收到 <code>end</code> 后给 1.5 秒宽限，宽限内来了正文就正常返回，没来才判失败。</p>
+<p>另外两件事也顺手做了：请求带 <code>request_id</code>，客户端只认匹配的回包——用户快速切歌时，上一首的榜经常会后到，不校验的话就会把 A 的分数画到 B 的榜上；整体 15 秒超时，流错误和解析错误分开归类，界面文案也不一样。</p>
+<p>后端写得再对，客户端把回包读错，用户看到的就是"排行榜没有返回内容"。</p>
+<h2 id="那个-rw-mode">那个 <code>rw_mode</code></h2>
+<p>回到开头的故障。</p>
+<p>灵珠的数据库表有个 <code>rw_mode</code>，是表的属性，不在工作流里，也不在 AIX 配置里：</p>
+<div class="table-wrap"><table><thead><tr><th>值</th><th>模式</th><th>实际效果</th></tr></thead><tbody><tr><td><code>1</code></td><td>单用户读写</td><td>平台按调用者给记录加范围，谁登录只看自己的</td></tr><tr><td><code>2</code></td><td>用户只读</td><td>提交不了成绩</td></tr><tr><td><code>3</code></td><td>多用户读写</td><td>能跨用户查询，共享榜必须用这个</td></tr></tbody></table></div>
+<p>工作流访问表的时候平台会应用这个模式。所以查询节点里没写 <code>user_id</code> 条件，不代表查询已经跨账号——这也是最误导人的地方：SQL 看着没问题，数据就是出不来。</p>
+<p>改的时候我按四步走：</p>
+<ol><li>先把完整的表配置备份下来，包括字段 ID、顺序、类型、必填，不只是记一个模式值；</li><li>只改成绩表 <code>rhythm_score</code> 改成 <code>3</code>。账号资料表 <code>rhythm_user</code> 保持原权限，不跟着一起放开；</li><li>改完回读，确认 <code>id</code>、表名、字段列表和备份一致。平台的更新接口返回里有些元数据是占位值，拿它当最终状态会被骗；</li><li>用两个真实账号验收：A、B 各打一局同一首歌，双方都能在榜里看到对方的分数，"你"的标记跟着当前登录账号走。</li></ol>
+<p>第 4 步不能省。单账号试运行、在请求 JSON 里换一个 <code>actor.id</code>、本地跑一遍排序测试，都证明不了平台的调用者隔离已经解除。我第一次就是只看单账号试运行通过就以为好了。</p>
+<p>改完之后多个账号的历史成绩立刻互相可见，不用重玩。Studio 查榜和眼镜端都确认过。</p>
+<p>完整的操作步骤、离线生成更新正文的脚本、回读核对的字段清单，整理在 <a href="docs/lingzhu-leaderboard-rw-mode.md">docs/lingzhu-leaderboard-rw-mode.md</a>；同样的流程也做成了可调用技能 <a href="https://github.com/sengmitnick/rokid-lingzhu-backend">rokid-lingzhu-backend</a>，下次遇到直接 <code>$rokid-lingzhu-backend</code> 让它带一遍。</p>
+<p>补一句边界：<code>rw_mode: 3</code> 给的是"能跨用户读写"这个能力，它不等于一套细粒度权限系统。我们只开了新增成绩和查询榜单，没有修改、删除别人成绩的接口。</p>
+<h2 id="分数其实不可信">分数其实不可信</h2>
+<p>代码 A 那九条校验挡得住秒结算、统计造假、超上限的分数，但挡不住三件事：改客户端直接报一个合法范围内的假分、重放一段真实成绩、伪造 <code>actor.id</code> 冒充别人。</p>
+<p>因为 <code>actor</code> 只是客户端声明，平台没有为它签名。</p>
+<p>所以这个榜的定位是展示和自娱，不能拿来发奖。真要办比赛，得另做服务端验证、请求签名、防重放、可信身份。这些话我写进了 README 和协议文档，而不是留在脑子里——换个时间换个人接手，没人会记得"这个分数不能信"。</p>
+<h2 id="bot-id-不进仓库">Bot ID 不进仓库</h2>
+<p>排行榜要一个 Bot ID。写进源码再开源，等于把自己的线上入口交出去，别人不光能看，还能往表里写数据。</p>
+<p>现在是示例配置 + 本地忽略：</p>
+<pre class="code lang-text"><code>config/service-config.example.js   入库，agentId 为空
+src/lib/service-config.local.js    git 忽略，放真实 ID
+src/lib/service-config.js          运行时入口，只做再导出</code></pre>
+<p>第一次跑 <code>npm run config:init</code> 从示例生成，之后永不覆盖。所有 npm 脚本都会先跑它，所以新克隆的仓库不用手工准备也能直接检查、测试、打包。</p>
+<p><code>agentId</code> 空着的时候排行榜就是离线态，界面写"排行榜未配置 · 本地成绩已保存"，本地成绩照常存，不影响试玩。</p>
+<h2 id="测了什么-没测什么">测了什么，没测什么</h2>
+<p>改完这一版，从干净克隆跑了一遍：</p>
 <pre class="code lang-bash"><code>npm ci --cache .npm-cache
 npm run check
 npm run test:all
 npm run pack</code></pre>
-<div class="table-wrap"><table><thead><tr><th>检查</th><th>结果</th></tr></thead><tbody><tr><td>工作流契约测试（Python + 内存 SQLite）</td><td><strong>15 项通过</strong></td></tr><tr><td>排行榜客户端测试（Node）</td><td><strong>11 项通过</strong></td></tr><tr><td>全仓库回归</td><td><strong>186 项通过，0 失败</strong></td></tr><tr><td>AIUI 结构检查</td><td>通过，本地模块路径全部解析</td></tr><tr><td>AIX 打包</td><td>通过，约 3.50 MB</td></tr></tbody></table></div>
-<p>契约测试覆盖：协议外壳与多余字段、重复键、曲目与谱面白名单、分数上限、判定数与拍数一致性、每人最高分与同分排序、本人不在前 N 时的名次、错误透传、以及 SQLite 里真实查询与包装逻辑的一致性。</p>
-<p>客户端测试覆盖：编码与解析、白名单拒绝、超时、无账号、用户同步失败不影响成绩、空 <code>end</code> 后补正文、只有 <code>final_answer</code>、只有 <code>metadata.output</code>、外层 <code>{"output":"..."}</code> 包裹。</p>
-<h3 id="10-2-还不能声称的">10.2 还不能声称的</h3>
-<ul><li>没有做压测：100 行窗口在千人量级会失效，这是已知设计上限；</li><li>没有做安全审计：分数不可信的结论只基于代码阅读，不是渗透测试；</li><li>真机证据仅限于「共享榜单在眼镜端可见」，不代表任意网络条件下都稳定；</li><li>本文不给出任何识别类指标——那是游戏侧的事，与后端无关。</li></ul>
-<p>完整记录见 <a href="docs/validation.md">docs/validation.md</a>。</p>
-<h2 id="十一-想在自己的-aiui-项目里复用-照着这张清单做">十一、想在自己的 AIUI 项目里复用，照着这张清单做</h2>
-<ol><li>想清楚<strong>榜怎么切</strong>（按关卡？按难度？按赛季？），把它变成表里的一个字段；</li><li>建两张表：用户快照 + 成绩流水，成绩表写 <code>score_basis</code>；</li><li><strong>只改成绩表</strong>的 <code>rw_mode</code> 为 <code>3</code>，账号表保持私有；改前备份、改后回读；</li><li>工作流按「校验 → 分支 → 数据节点 → 包装 → 汇总」搭，校验全部集中在代码 A；</li><li>客户端先写本地，再同步云端，云端失败只提示不阻塞；</li><li>客户端解析回包时同时兼容 <code>content</code> / <code>final_answer</code> / <code>metadata.output</code> / 空 <code>end</code>；</li><li>用 <code>request_id</code> 丢弃过期回包；</li><li><strong>用两个真实账号</strong>验收共享榜单；</li><li>在 README 顶部写清「分数是客户端上报，不用于发奖」。</li></ol>
-<h2 id="十二-复盘">十二、复盘</h2>
-<p><strong>1. 平台权限模型比查询语句更先决。</strong> 查不到别人的数据，先看表的 <code>rw_mode</code>，再看 SQL。</p>
-<p><strong>2. 回包格式要按真实时序写，不要按文档写。</strong> 空 <code>end</code> 之后补正文这种事，只有真机会告诉你。</p>
-<p><strong>3. 校验要集中，数据节点要笨。</strong> 节点里做业务判断，改一次需求就要重连一次工作流。</p>
-<p><strong>4. 拍数这类「两边都有的常量」是长期隐患。</strong> 能放服务端就放服务端，放不下就必须在发版清单里绑死。</p>
-<p><strong>5. 信任边界要写进数据模型。</strong> <code>score_basis</code> 一个字段，省掉无数次解释。</p>
-<p>后续真正该做的：把「取 100 行再排」换成服务端排序分页；给成绩提交加签名与防重放；把用户表改成 <code>upsert</code> 而不是每次插快照。</p>
-<h2 id="十三-开源与素材">十三、开源与素材</h2>
-<pre class="code lang-text"><code>backend/v1/  灵珠代码节点、协议、表结构、契约测试（本文主体）
+<ul><li>工作流契约测试（Python + 内存 SQLite）：15 项通过，覆盖协议外壳、重复键、曲目白名单、分数上限、拍数一致性、每人最高分、同分排序、本人掉出前 N 的名次、错误透传，以及 SQLite 里真实查询和包装逻辑是否一致；</li><li>排行榜客户端测试（Node）：11 项通过，覆盖空 <code>end</code> 后补正文、只有 <code>final_answer</code>、只有 <code>metadata.output</code>、外层包裹、超时、无账号、用户同步失败不影响成绩；</li><li>全仓库回归 186 项，0 失败；AIUI 结构检查和打包都过。</li></ul>
+<p>没做的也写在这儿：</p>
+<ul><li>没压测。查询窗口是 100 行，千人量级会开始失真，这是设计上限，不是 bug；</li><li>没做安全审计。"分数不可信"的结论来自读代码，不是渗透测试；</li><li>真机证据只有一条：共享榜单在眼镜端能看到。网络差的时候稳不稳，没系统测过。</li></ul>
+<h2 id="想抄的话-按这个顺序">想抄的话，按这个顺序</h2>
+<ol><li>先想清楚榜怎么切（按关卡？按难度？按赛季？），把它变成表里的一个字段；</li><li>建两张表，成绩表务必有 <code>score_basis</code>；</li><li>只改成绩表的 <code>rw_mode</code> 成 <code>3</code>，账号表别动；改前备份，改后回读；</li><li>工作流按"校验 → 分支 → 数据节点 → 包装 → 汇总"排，校验全塞进代码 A；</li><li>客户端先写本地再同步云端，云端失败只提示不阻塞；</li><li>解析回包时把四种形态都兜住，尤其空 <code>end</code>；</li><li>用 <code>request_id</code> 丢掉过期回包；</li><li>找两个真实账号验收，别用换 <code>actor.id</code> 代替；</li><li>在 README 第一屏写清楚分数是客户端上报的。</li></ol>
+<h2 id="还没做的">还没做的</h2>
+<ul><li>"取 100 行再排序"迟早要换成分页和服务端排序，人一多就撑不住；</li><li>用户表现在是每次提交插一行快照，应该改成 <code>upsert</code>；</li><li>成绩提交没有签名，防重放也没做。</li></ul>
+<p>三件事都不难，但都不该在演示阶段做——做早了就是给没人用的功能上锁。</p>
+<h2 id="仓库">仓库</h2>
+<pre class="code lang-text"><code>backend/v1/  代码节点、协议、表结构、契约测试（本文主体）
 config/      智能体定义、服务配置示例
 src/lib/     排行榜客户端与协议解析
 docs/        本文、rw_mode 指南、验证记录</code></pre>
-<ul><li>仓库：<a href="https://github.com/sengmitnick/rhythm-jump">https://github.com/sengmitnick/rhythm-jump</a></li><li>网页版（GitHub Pages）：<a href="https://sengmitnick.github.io/rhythm-jump/">https://sengmitnick.github.io/rhythm-jump/</a></li><li>配套技能：<a href="https://github.com/sengmitnick/rokid-lingzhu-backend">rokid-lingzhu-backend</a>（在 Codex 里用 $rokid-lingzhu-backend 调用）</li><li>原创代码：<a href="LICENSE">MIT License</a>　｜　第三方素材：<a href="THIRD_PARTY_NOTICES.md">THIRD_PARTY_NOTICES.md</a></li><li>对应版本：【Tag 或 Commit】</li></ul>
-<p>文中排行榜截图使用测试昵称（阿青、Ming、小林等），不含真实玩家数据。示例仓库不包含真实 Bot ID、数据库表 ID、账号信息与线上成绩。</p>
+<ul><li>仓库：<a href="https://github.com/sengmitnick/rhythm-jump">https://github.com/sengmitnick/rhythm-jump</a></li><li>网页版：<a href="https://sengmitnick.github.io/rhythm-jump/">https://sengmitnick.github.io/rhythm-jump/</a></li><li>原创代码 MIT；第三方音频和谱面按各自 CC 许可，见 <a href="THIRD_PARTY_NOTICES.md">THIRD_PARTY_NOTICES.md</a></li><li>对应版本：【Tag 或 Commit】</li></ul>
+<p>文中截图用的是测试昵称（阿青、Ming、小林等），没有真实玩家数据。示例仓库里也不含真实 Bot ID、表 ID 和线上成绩。</p>
 <hr>
 <h2 id="作者提交前核对项">作者提交前核对项</h2>
-<ul><li>[ ] 补充作者昵称、真实 AIUI ID、实际上架状态与可核验链接。</li><li>[ ] 补充最终 Tag / Commit 与跨账号验收截图。</li><li>[ ] 论坛以「普通贴」发布到「征文计划」板块并保持公开可见。</li><li>[ ] CSDN 发布同一篇原创文章，可见范围设为「全部可见」。</li><li>[ ] 如参与多平台奖励，按活动规则补充对应平台链接与截图。</li></ul>
+<ul><li>[ ] 补作者昵称、真实 AIUI ID、实际上架状态与可核验链接。</li><li>[ ] 补最终 Tag / Commit 和跨账号验收截图。</li><li>[ ] 论坛发"普通贴"，板块选"征文计划"，保持公开可见。</li><li>[ ] CSDN 发同一篇，可见范围"全部可见"。</li><li>[ ] 参与多平台奖励的话，再补对应平台链接。</li></ul>
     <footer>
       <span>原创代码 MIT，第三方音频与谱面按各自 CC 许可</span>
       <a href="https://github.com/sengmitnick/rhythm-jump">github.com/sengmitnick/rhythm-jump</a>

@@ -1,21 +1,54 @@
-// Frame pacing for the 480x352 native stage. The host delivers display callbacks
-// at an unknown cadence, so the page asks for 60 fps and backs off when a frame
-// costs too much. Recording the screen roughly doubles the paint cost, which is
-// exactly when the old fixed 30 fps budget collapsed.
+// Frame pacing for the 480x352 native stage. Ask the host for its display
+// cadence, start at 60 fps, and use sustained render cost (not a single GC
+// spike) to step down to 45 or 30 fps when the device is under load.
 export const TARGET_FPS = 60;
-export const MIN_FPS = 24;
+export const MIN_FPS = 30;
 export const MIN_INTERVAL_MS = 1000 / TARGET_FPS;
 export const MAX_INTERVAL_MS = 1000 / MIN_FPS;
+export const FRAME_INTERVALS_MS = Object.freeze([1000 / 60, 1000 / 45, 1000 / 30]);
 
-// One step per call; the caller applies it at most once per frame. A frame that
-// eats more than half its budget widens the interval, an idle frame narrows it.
-// Both directions are bounded so the loop cannot oscillate between extremes.
-export function nextFrameInterval(currentMs, costMs) {
-  const current = Number.isFinite(currentMs) && currentMs > 0 ? currentMs : MIN_INTERVAL_MS;
-  const cost = Number.isFinite(costMs) && costMs >= 0 ? costMs : 0;
-  if (cost > current * 0.5) return Math.min(MAX_INTERVAL_MS, current * 1.25);
-  if (cost < current * 0.2) return Math.max(MIN_INTERVAL_MS, current * 0.9);
-  return current;
+export class FramePacer {
+  constructor() { this.reset(); }
+
+  reset() {
+    this.level = 0;
+    this.intervalMs = FRAME_INTERVALS_MS[0];
+    this.costMs = 0;
+    this.samples = 0;
+    this.cooldown = 0;
+    this.highLoadSamples = 0;
+    this.lowLoadSamples = 0;
+  }
+
+  observe(costMs) {
+    if (!Number.isFinite(costMs) || costMs < 0) return this.intervalMs;
+    this.costMs = this.samples === 0 ? costMs : this.costMs * 0.85 + costMs * 0.15;
+    this.samples++;
+    const overloaded = this.costMs > this.intervalMs * 0.70;
+    const recoverable = this.level > 0 && this.costMs < FRAME_INTERVALS_MS[this.level - 1] * 0.48;
+    this.highLoadSamples = overloaded ? this.highLoadSamples + 1 : 0;
+    this.lowLoadSamples = recoverable ? this.lowLoadSamples + 1 : 0;
+    if (this.cooldown > 0) {
+      this.cooldown--;
+      return this.intervalMs;
+    }
+
+    // Six sustained expensive frames are enough to protect the next tier.
+    // Recovery is intentionally slower so alternating work/GC frames do not
+    // make the target cadence bounce while a recording is active.
+    if (this.highLoadSamples >= 6 && this.level < FRAME_INTERVALS_MS.length - 1) {
+      this.level++;
+      this.intervalMs = FRAME_INTERVALS_MS[this.level];
+      this.highLoadSamples = 0; this.lowLoadSamples = 0;
+      this.cooldown = 8;
+    } else if (this.lowLoadSamples >= 45 && this.level > 0) {
+      this.level--;
+      this.intervalMs = FRAME_INTERVALS_MS[this.level];
+      this.highLoadSamples = 0; this.lowLoadSamples = 0;
+      this.cooldown = 24;
+    }
+    return this.intervalMs;
+  }
 }
 
 // Frames are dropped by skipping the draw, never by stretching game time: the

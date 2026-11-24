@@ -17,11 +17,12 @@ export const SERVICE_CONFIG = {
   fullMotionTrace: false,
 
   // Per-device timing calibration.
-  //   audioOffsetMs: how late the recording becomes audible after play(). Raise it
-  //     if hits feel late on a given device; the chart waits that long before the
-  //     first beat so the visible and audible downbeat agree.
-  //   Keep it 0 unless a device needs it: this is calibration, not a hidden delay.
-  timing: { audioOffsetMs: 0 },
+  //   audioOffsetMs: estimated delay from play() submission to audible output.
+  //     The 80 ms default is an engineering starting point; tune it from a filmed
+  //     or loopback device run. Positive values make the chart wait for the sound.
+  //   displayOffsetMs: read-only render-clock calibration. Positive values draw a
+  //     future frame to counter display latency; scoring and judgement never use it.
+  timing: { audioOffsetMs: 80, displayOffsetMs: 0 },
 
   // Development receivers for local motion research. Replace with your own.
   logURLs: [

@@ -22,13 +22,32 @@ export class Game {
     this.course = course; this.status = 'ready'; this.elapsedMs = 0; this.origin = 0;
     this.judgements = []; this.done = new Set(); this.last = null; this.recent = [];
     this._usedMovement = new Map();
-    this.energy = 0; this.startedAt = null;
+    this.energy = 0; this.startedAt = null; this.holdStartedAt = 0; this.holdUntil = 0;
     this._totals = { score: 0, combo: 0, maxCombo: 0, perfect: 0, good: 0, ok: 0, miss: 0 };
   }
-  start(now) { if (this.status === 'ready') { this.status = 'playing'; this.origin = now; this.startedAt = now; } }
-  time(now) { return this.status === 'playing' ? Math.min(this.course.durationMs, Math.max(0, now - this.origin)) : this.elapsedMs; }
+  start(now, delayMs = 0) {
+    if (this.status === 'ready') {
+      const delay = Number.isFinite(delayMs) ? Math.max(0, delayMs) : 0;
+      this.status = 'playing'; this.holdStartedAt = now; this.holdUntil = now + delay;
+      this.origin = this.holdUntil; this.startedAt = this.origin; this.lastTickAt = this.holdUntil;
+    }
+  }
+  time(now) {
+    if (this.status !== 'playing') return this.elapsedMs;
+    // Actual clock reads freeze during output warm-up. Older movement timestamps
+    // still map normally, which preserves replay/adapter semantics across pause.
+    if (now >= this.holdStartedAt && now < this.holdUntil) return this.elapsedMs;
+    return Math.min(this.course.durationMs, Math.max(0, now - this.origin));
+  }
   pause(now) { if (this.status === 'playing') { this.elapsedMs = this.time(now); this.status = 'paused'; } }
-  resume(now) { if (this.status === 'paused') { this.origin = now - this.elapsedMs; this.status = 'playing'; } }
+  resume(now, delayMs = 0) {
+    if (this.status === 'paused') {
+      const delay = Number.isFinite(delayMs) ? Math.max(0, delayMs) : 0;
+      this.holdStartedAt = now; this.holdUntil = now + delay;
+      this.origin = this.holdUntil - this.elapsedMs; this.lastTickAt = this.holdUntil;
+      this.status = 'playing';
+    }
+  }
   next(now) {
     const t = this.time(now);
     let nearest = null;
@@ -114,8 +133,8 @@ export class Game {
     for (const e of this.course.events) {
       if (!this.done.has(e.id) && (t > e.atMs + EXPIRE_MS || t >= this.course.durationMs)) this.judge(e, 'miss', null, t);
     }
-    const drift = (now - (this.lastTickAt ?? now)) / 1000;
-    this.lastTickAt = now;
+    const drift = now < this.holdUntil ? 0 : (now - (this.lastTickAt ?? now)) / 1000;
+    if (now >= this.holdUntil) this.lastTickAt = now;
     if (this.energy > 0) this.energy = clamp01(this.energy - Math.max(0, drift) * 0.05);
     if (t >= this.course.durationMs) { this.elapsedMs = this.course.durationMs; this.status = 'finished'; }
   }

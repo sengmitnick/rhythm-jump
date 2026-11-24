@@ -8,7 +8,8 @@ import { LanResearchLog } from '../src/lib/lan-research-log.js';
 import { ConsoleResearchLog } from '../src/lib/console-research-log.js';
 import { HeadPose } from '../src/lib/head-pose.js';
 import { createPerfMeter } from '../src/lib/perf-meter.js';
-import { MIN_INTERVAL_MS, nextFrameInterval } from '../src/lib/frame-pacing.js';
+import { FramePacer, MIN_INTERVAL_MS, shouldDrawFrame } from '../src/lib/frame-pacing.js';
+import { SensorClock } from '../src/lib/sensor-clock.js';
 import { MenuNavigation, templeKey } from '../src/lib/menu-navigation.js';
 import { tutorialSample, warmupSample } from './fixtures/motion.js';
 
@@ -24,7 +25,8 @@ async function settle() { for (let i = 0; i < 8; i++) await Promise.resolve(); }
 
 const TUTORIAL_KEY = 'rhythm-tutorial-complete-v1';
 
-function setup({logURL, request, rejectResearchStorage=false, tutorialComplete=true, animationFrames=false, motionDiagnostics=false}={}) {
+function setup({logURL, request, rejectResearchStorage=false, tutorialComplete=true, animationFrames=false,
+  motionDiagnostics=false, agentId='', timing={audioOffsetMs:0,displayOffsetMs:0}}={}) {
   let now = 0, nextTimer = 1, canvasCreates = 0;
   const active = new Map(), errors = [], sensors = [], storage = new Map(), rendered = [], consoleLines = [], previews = [];
   if (tutorialComplete) storage.set(TUTORIAL_KEY, true);
@@ -82,9 +84,9 @@ function setup({logURL, request, rejectResearchStorage=false, tutorialComplete=t
   }
   const sandbox = {
     Session, ResearchLog, LanResearchLog, ConsoleResearchLog, HeadPose, createPerfMeter, MenuNavigation, templeKey, TutorialVoice,
-    MIN_INTERVAL_MS, nextFrameInterval,
+    FramePacer, MIN_INTERVAL_MS, shouldDrawFrame, SensorClock,
     RhythmAudio: TestAudio, AudioContext: undefined, AudioPlayer: undefined, Accelerometer, Gyroscope, AbsoluteOrientationSensor,
-    render: (_ctx, model) => rendered.push(model), SERVICE_CONFIG: {logURL, motionDiagnostics}, performance: { now: () => now },
+    render: (_ctx, model) => rendered.push(model), SERVICE_CONFIG: {logURL, motionDiagnostics, agentId, timing}, performance: { now: () => now },
     crypto: { randomUUID: () => '00000000-0000-4000-8000-000000000001' },
     wx: {
       createCanvasContext: () => { canvasCreates++; return {}; },
@@ -97,7 +99,7 @@ function setup({logURL, request, rejectResearchStorage=false, tutorialComplete=t
       removeStorageSync: key => storage.delete(key),
     },
     console: { error: (...args) => errors.push(args.join(' ')), warn: () => {}, log: line => consoleLines.push(line) },
-    setTimeout: fn => { const id = nextTimer++; active.set(id, { fn, once: true }); return id; },
+    setTimeout: (fn, delay=0) => { const id = nextTimer++; active.set(id, { fn, once: true, dueAt: now + delay }); return id; },
     setInterval: fn => { const id = nextTimer++; active.set(id, { fn }); return id; },
     clearTimeout: clearTimer, clearInterval: clearTimer,
   };
@@ -117,7 +119,7 @@ function setup({logURL, request, rejectResearchStorage=false, tutorialComplete=t
     time: value => { now = value; },
     advance: delta => { now += delta; },
     flushTimeouts() {
-      for (const [id, item] of [...active]) if (item.once) { active.delete(id); item.fn(); }
+      for (const [id, item] of [...active]) if (item.once && item.dueAt <= now) { active.delete(id); item.fn(); }
     },
     frame() {
       for (const [id, item] of [...active]) if (!item.once) {
