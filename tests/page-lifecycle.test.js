@@ -8,6 +8,7 @@ import { LanResearchLog } from '../src/lib/lan-research-log.js';
 import { ConsoleResearchLog } from '../src/lib/console-research-log.js';
 import { HeadPose } from '../src/lib/head-pose.js';
 import { createPerfMeter } from '../src/lib/perf-meter.js';
+import { MIN_INTERVAL_MS, nextFrameInterval } from '../src/lib/frame-pacing.js';
 import { MenuNavigation, templeKey } from '../src/lib/menu-navigation.js';
 import { tutorialSample, warmupSample } from './fixtures/motion.js';
 
@@ -81,6 +82,7 @@ function setup({logURL, request, rejectResearchStorage=false, tutorialComplete=t
   }
   const sandbox = {
     Session, ResearchLog, LanResearchLog, ConsoleResearchLog, HeadPose, createPerfMeter, MenuNavigation, templeKey, TutorialVoice,
+    MIN_INTERVAL_MS, nextFrameInterval,
     RhythmAudio: TestAudio, AudioContext: undefined, AudioPlayer: undefined, Accelerometer, Gyroscope, AbsoluteOrientationSensor,
     render: (_ctx, model) => rendered.push(model), SERVICE_CONFIG: {logURL, motionDiagnostics}, performance: { now: () => now },
     crypto: { randomUUID: () => '00000000-0000-4000-8000-000000000001' },
@@ -174,12 +176,14 @@ test('display callbacks cap frame submissions and a silent host falls back to a 
   page._frame = () => { draws++; };
   page.onReady(); fixture.flushTimeouts();
   assert.equal(draws, 1);
-  fixture.time(17); fixture.frame();
-  assert.equal(draws, 1);
-  fixture.time(34); fixture.frame();
-  assert.equal(draws, 2);
-  fixture.time(51); fixture.frame();
-  assert.equal(draws, 2);
+  // The page now asks for 60 fps, so assert the cap relative to the target
+  // interval instead of hard-coding the old 30 fps steps.
+  fixture.time(MIN_INTERVAL_MS * 0.5); fixture.frame();
+  assert.equal(draws, 1, 'a frame inside the target interval is skipped');
+  fixture.time(MIN_INTERVAL_MS); fixture.frame();
+  assert.equal(draws, 2, 'the next target interval draws');
+  fixture.time(MIN_INTERVAL_MS * 1.5); fixture.frame();
+  assert.equal(draws, 2, 'the loop keeps the target cadence');
   page.onHide();
   assert.equal(active.size, 0);
 

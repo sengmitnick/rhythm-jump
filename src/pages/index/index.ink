@@ -14,6 +14,7 @@ import { TutorialVoice } from '../../lib/tutorial-voice.js';
 import { renderSpatial as render } from '../../lib/spatial-render.js';
 import { HeadPose } from '../../lib/head-pose.js';
 import { createPerfMeter } from '../../lib/perf-meter.js';
+import { MIN_INTERVAL_MS, nextFrameInterval } from '../../lib/frame-pacing.js';
 import { SERVICE_CONFIG } from '../../lib/service-config.js';
 import { ResearchLog } from '../../lib/research-log.js';
 import { LanResearchLog } from '../../lib/lan-research-log.js';
@@ -22,7 +23,6 @@ import { LeaderboardClient } from '../../lib/leaderboard-client.js';
 import { MenuNavigation, templeKey } from '../../lib/menu-navigation.js';
 
 const MOTION_DIAGNOSTICS = SERVICE_CONFIG.motionDiagnostics === true;
-const FRAME_INTERVAL_MS = 1000 / 30;
 const FRAME_START_TIMEOUT_MS = 400;
 const DIAGNOSTIC_RAW_TRACE_INTERVAL_MS = 80;
 const FRAME_STATS_WINDOW_MS = 5000;
@@ -47,6 +47,7 @@ export default {
       onTutorialRepeat:()=>this._tutorialVoice.retry(),onResult:(r,s)=>this._save(r,s),
       onTrace:MOTION_DIAGNOSTICS?e=>this._trace(e):null,
       rawTraceIntervalMs:this._rawTraceIntervalMs,
+      audioOffsetMs:SERVICE_CONFIG.timing?.audioOffsetMs,
     });
     this._session.courses=this._session.courses.filter(course=>course.native);
     this._menu=new MenuNavigation(this._session.courses.length);
@@ -116,10 +117,11 @@ export default {
   onUnload(){this._unloaded=true;if(this._initTimer!=null)clearTimeout(this._initTimer);this.onHide();this._session?.destroy().catch(console.error);this._ctx=null;},
   _loop(){
     if (this._timer != null) return;
+    if (!(this._frameIntervalMs > 0)) this._frameIntervalMs = MIN_INTERVAL_MS;
     this._lastFrameKey = null;
     this._usesAnimationFrame = typeof requestAnimationFrame === 'function' && typeof cancelAnimationFrame === 'function';
     if (this._usesAnimationFrame) {
-      let nextFrameAt = performance.now() + FRAME_INTERVAL_MS;
+      let nextFrameAt = performance.now() + this._frameIntervalMs;
       const draw = () => {
         if (!this._visible || !this._usesAnimationFrame) return;
         if (this._frameWatch != null) clearTimeout(this._frameWatch);
@@ -127,7 +129,8 @@ export default {
         this._timer = requestAnimationFrame(draw);
         const now = performance.now();
         if (now + 1 < nextFrameAt) return;
-        nextFrameAt = Math.max(nextFrameAt + FRAME_INTERVAL_MS, now + FRAME_INTERVAL_MS / 2);
+        const interval = this._frameIntervalMs;
+        nextFrameAt = Math.max(nextFrameAt + interval, now + interval / 2);
         this._frame();
       };
       this._timer = requestAnimationFrame(draw);
@@ -136,12 +139,12 @@ export default {
         this._frameWatch = null;
         this._stopLoop();
         if (this._visible) {
-          this._timer = setInterval(() => this._frame(), FRAME_INTERVAL_MS);
+          this._timer = setInterval(() => this._frame(), this._frameIntervalMs);
           this._frame();
         }
       }, FRAME_START_TIMEOUT_MS);
     } else {
-      this._timer = setInterval(() => this._frame(), FRAME_INTERVAL_MS);
+      this._timer = setInterval(() => this._frame(), this._frameIntervalMs);
     }
     this._frame();
   },
@@ -226,6 +229,9 @@ export default {
       this._lastFrameKey = key;
       if (measureFrame) this._recordFrameTiming(startedAt, renderStartedAt, performance.now());
       if (MOTION_DIAGNOSTICS) this._sendResearch(startedAt);
+      // Back off when a frame costs too much (screen recording roughly doubles it)
+      // and come back up when the host has headroom again. Never stretch game time.
+      this._frameIntervalMs = nextFrameInterval(this._frameIntervalMs, performance.now() - startedAt);
     } catch (e) {
       this._stopLoop();
       console.error('[rhythm] frame', String(e));

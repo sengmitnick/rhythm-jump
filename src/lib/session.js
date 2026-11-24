@@ -36,7 +36,7 @@ function calibrationPhase(hint = '') {
 export class Session {
   constructor({ audio = null, clock = null, onResult = () => {}, onTrace = null,
     tutorialComplete = false, onTutorialComplete = () => {}, onTutorialRepeat = () => {}, requireUpright = false,
-    rawTraceIntervalMs = 0 } = {}) {
+    rawTraceIntervalMs = 0, audioOffsetMs = 0 } = {}) {
     this.audio = audio;
     this.clock = clock || (() => audio ? audio.now() : performance.now());
     this.onResult = onResult;
@@ -52,6 +52,10 @@ export class Session {
     this.tutorialComplete = tutorialComplete; this.onTutorialComplete = onTutorialComplete; this.tutorial = null;
     this.onTutorialRepeat = onTutorialRepeat;
     this.weakJumps = 0;
+    // The recording starts when seek+play returns, not when the beat is audible.
+    // A positive offset moves the chart origin later so the visible downbeat and
+    // the audible one coincide; it is a calibration value, never a hidden delay.
+    this.audioOffsetMs = Number.isFinite(audioOffsetMs) ? Math.max(0, Math.min(600, audioOffsetMs)) : 0;
     this._phase = null;
   }
   trace(type, data = {}, now) {
@@ -356,11 +360,12 @@ export class Session {
     this.calibrationStep = null;
     this.body.calibrate(now);
     this.lastState = this.body.snapshot(now);
-    this.game.start(now);
+    // The tutorial has no recording, so it never waits for an audible downbeat.
+    this.game.start(now + (this.tutorial ? 0 : this.audioOffsetMs));
     this.mode = this.tutorial ? 'tutorial' : 'playing';
     if (this.tutorial) this.audio?.stopMusic?.();
     else this.audio?.startMusic?.(0);
-    this.trace('state', { state: this.mode, posture: this.lastState }, now);
+    this.trace('state', { state: this.mode, posture: this.lastState, audioOffsetMs: this.audioOffsetMs, chartOriginMs: this.game.origin }, now);
   }
 
   _queueTutorialCue(now) {
