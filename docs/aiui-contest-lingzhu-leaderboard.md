@@ -3,7 +3,7 @@
 > 征文活动：[AIUI 十二月征文计划](https://forum.rokid.com/post/detail/3911)
 > 开源仓库：[https://github.com/sengmitnick/rhythm-jump](https://github.com/sengmitnick/rhythm-jump)
 > 配套技能：[rokid-lingzhu-backend](https://github.com/sengmitnick/rokid-lingzhu-backend)
-> 智能体名称：节奏开跳　｜　AIUI ID：【真实 AIUI ID】　｜　上架状态：【未提交 / 审核中 / 已上架，附真实链接】
+> 智能体名称：节奏开跳
 
 做这个排行榜之前，我以为最难的是排序。
 
@@ -289,16 +289,6 @@ docs/        本文、rw_mode 指南、验证记录
 - 仓库：[https://github.com/sengmitnick/rhythm-jump](https://github.com/sengmitnick/rhythm-jump)
 - 网页版：[https://sengmitnick.github.io/rhythm-jump/](https://sengmitnick.github.io/rhythm-jump/)
 - 原创代码 MIT；第三方音频和谱面按各自 CC 许可，见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
-- 对应版本：【Tag 或 Commit】
+- 提交历史：[commits/main](https://github.com/sengmitnick/rhythm-jump/commits/main)
 
 文中截图用的是测试昵称（阿青、Ming、小林等），没有真实玩家数据。示例仓库里也不含真实 Bot ID、表 ID 和线上成绩。
-
----
-
-## 作者提交前核对项
-
-- [ ] 补作者昵称、真实 AIUI ID、实际上架状态与可核验链接。
-- [ ] 补最终 Tag / Commit 和跨账号验收截图。
-- [ ] 论坛发"普通贴"，板块选"征文计划"，保持公开可见。
-- [ ] CSDN 发同一篇，可见范围"全部可见"。
-- [ ] 参与多平台奖励的话，再补对应平台链接。

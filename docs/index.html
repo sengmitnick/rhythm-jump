@@ -83,7 +83,6 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
     <a class="lv2" href="#想抄的话-按这个顺序">想抄的话，按这个顺序</a>
     <a class="lv2" href="#还没做的">还没做的</a>
     <a class="lv2" href="#仓库">仓库</a>
-    <a class="lv2" href="#作者提交前核对项">作者提交前核对项</a>
   </nav>
   <article>
     <div class="top">
@@ -93,7 +92,7 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
       <a class="pill" href="https://github.com/sengmitnick/rokid-lingzhu-backend">灵珠后端技能</a>
     </div>
     <h1>灵珠当后端：给 AIUI 应用做一张跨账号排行榜</h1>
-<blockquote><p>征文活动：<a href="https://forum.rokid.com/post/detail/3911">AIUI 十二月征文计划</a></p><p>开源仓库：<a href="https://github.com/sengmitnick/rhythm-jump">https://github.com/sengmitnick/rhythm-jump</a></p><p>配套技能：<a href="https://github.com/sengmitnick/rokid-lingzhu-backend">rokid-lingzhu-backend</a></p><p>智能体名称：节奏开跳　｜　AIUI ID：【真实 AIUI ID】　｜　上架状态：【未提交 / 审核中 / 已上架，附真实链接】</p></blockquote>
+<blockquote><p>征文活动：<a href="https://forum.rokid.com/post/detail/3911">AIUI 十二月征文计划</a></p><p>开源仓库：<a href="https://github.com/sengmitnick/rhythm-jump">https://github.com/sengmitnick/rhythm-jump</a></p><p>配套技能：<a href="https://github.com/sengmitnick/rokid-lingzhu-backend">rokid-lingzhu-backend</a></p><p>智能体名称：节奏开跳</p></blockquote>
 <p>做这个排行榜之前，我以为最难的是排序。</p>
 <p>结果第一版上线，两个账号各自提交成绩都成功，换台设备登录，榜单里只剩自己。查了半天 SQL，条件写得干干净净，就是没有 <code>user_id</code> 过滤。后来才发现问题根本不在查询语句，而在那张表的权限模式：平台按调用者把记录隔离了，工作流再怎么查都只看得见自己那份。</p>
 <p>这篇文章记录的就是这一路的活：AIUI 应用没有服务器，怎么用灵珠把成绩存下来、排出来、让两个真实账号互相看得见。游戏是体感节奏游戏「节奏开跳」，但它在这里只是"每局结束产生一条成绩"的客户端，动作怎么判定不在本文范围。文章中间有一节专门讲这套搭后端的流程后来怎么变成了一个 Codex 技能。</p>
@@ -217,11 +216,8 @@ npm run pack</code></pre>
 config/      智能体定义、服务配置示例
 src/lib/     排行榜客户端与协议解析
 docs/        本文、rw_mode 指南、验证记录</code></pre>
-<ul><li>仓库：<a href="https://github.com/sengmitnick/rhythm-jump">https://github.com/sengmitnick/rhythm-jump</a></li><li>网页版：<a href="https://sengmitnick.github.io/rhythm-jump/">https://sengmitnick.github.io/rhythm-jump/</a></li><li>原创代码 MIT；第三方音频和谱面按各自 CC 许可，见 <a href="THIRD_PARTY_NOTICES.md">THIRD_PARTY_NOTICES.md</a></li><li>对应版本：【Tag 或 Commit】</li></ul>
+<ul><li>仓库：<a href="https://github.com/sengmitnick/rhythm-jump">https://github.com/sengmitnick/rhythm-jump</a></li><li>网页版：<a href="https://sengmitnick.github.io/rhythm-jump/">https://sengmitnick.github.io/rhythm-jump/</a></li><li>原创代码 MIT；第三方音频和谱面按各自 CC 许可，见 <a href="THIRD_PARTY_NOTICES.md">THIRD_PARTY_NOTICES.md</a></li><li>提交历史：<a href="https://github.com/sengmitnick/rhythm-jump/commits/main">commits/main</a></li></ul>
 <p>文中截图用的是测试昵称（阿青、Ming、小林等），没有真实玩家数据。示例仓库里也不含真实 Bot ID、表 ID 和线上成绩。</p>
-<hr>
-<h2 id="作者提交前核对项">作者提交前核对项</h2>
-<ul><li>[ ] 补作者昵称、真实 AIUI ID、实际上架状态与可核验链接。</li><li>[ ] 补最终 Tag / Commit 和跨账号验收截图。</li><li>[ ] 论坛发"普通贴"，板块选"征文计划"，保持公开可见。</li><li>[ ] CSDN 发同一篇，可见范围"全部可见"。</li><li>[ ] 参与多平台奖励的话，再补对应平台链接。</li></ul>
     <footer>
       <span>原创代码 MIT，第三方音频与谱面按各自 CC 许可</span>
       <a href="https://github.com/sengmitnick/rhythm-jump">github.com/sengmitnick/rhythm-jump</a>
