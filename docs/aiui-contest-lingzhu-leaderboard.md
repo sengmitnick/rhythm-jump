@@ -1,6 +1,5 @@
 # 灵珠当后端：给 AIUI 应用做一张跨账号排行榜
 
-> 征文活动：[AIUI 十二月征文计划](https://forum.rokid.com/post/detail/3911)
 > 开源仓库：[https://github.com/sengmitnick/rhythm-jump](https://github.com/sengmitnick/rhythm-jump)
 > 配套技能：[rokid-lingzhu-backend](https://github.com/sengmitnick/rokid-lingzhu-backend)
 > 智能体名称：节奏开跳
