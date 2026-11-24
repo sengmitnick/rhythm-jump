@@ -4,7 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>用灵珠做后端、用 IMU 做输入：AIUI 体感游戏「节奏开跳」</title>
-<meta name="description" content="节奏开跳开源实践：灵珠工作流共享排行榜后端 +  Rokid AI 眼镜头部 IMU 体感判定">
+<meta name="description" content="用灵珠数据表和工作流给 AIUI 应用做后端：跨账号共享排行榜的表设计、协议、流式回包与双账号验收">
+<meta property="og:title" content="灵珠当后端：给 AIUI 应用做一张跨账号排行榜">
+<meta property="og:description" content="AIUI 应用没有服务器，用灵珠数据表 + 工作流 + 流式协议做出跨账号共享排行榜">
+<meta property="og:image" content="images/cover.png">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
 <style>
 :root{
   --bg:#ffffff;--fg:#12151a;--muted:#5b6472;--line:#e3e7ee;--accent:#0f9d58;
@@ -51,6 +56,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:var(--card);font-weight:600;white-space:nowrap}
 img{max-width:100%;height:auto;border-radius:10px;border:1px solid var(--line);display:block;margin:14px 0}
+img[src$="cover.png"]{border:0;border-radius:16px;box-shadow:0 18px 44px rgba(16,38,66,.14);margin:22px 0 26px}
 .top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px;font-size:13px}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;
   border:1px solid var(--line);color:var(--muted);background:var(--card)}
@@ -93,6 +99,7 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
     </div>
     <h1>灵珠当后端：给 AIUI 应用做一张跨账号排行榜</h1>
 <blockquote><p>开源仓库：<a href="https://github.com/sengmitnick/rhythm-jump">https://github.com/sengmitnick/rhythm-jump</a></p><p>配套技能：<a href="https://github.com/sengmitnick/rokid-lingzhu-backend">rokid-lingzhu-backend</a></p><p>智能体名称：节奏开跳</p></blockquote>
+<p><img alt="灵珠当后端：给 AIUI 应用做一张跨账号排行榜" src="images/cover.png" loading="lazy"></p>
 <p>做这个排行榜之前，我以为最难的是排序。</p>
 <p>结果第一版上线，两个账号各自提交成绩都成功，换台设备登录，榜单里只剩自己。查了半天 SQL，条件写得干干净净，就是没有 <code>user_id</code> 过滤。后来才发现问题根本不在查询语句，而在那张表的权限模式：平台按调用者把记录隔离了，工作流再怎么查都只看得见自己那份。</p>
 <p>这篇文章记录的就是这一路的活：AIUI 应用没有服务器，怎么用灵珠把成绩存下来、排出来、让两个真实账号互相看得见。游戏是体感节奏游戏「节奏开跳」，但它在这里只是"每局结束产生一条成绩"的客户端，动作怎么判定不在本文范围。文章中间有一节专门讲这套搭后端的流程后来怎么变成了一个 Codex 技能。</p>

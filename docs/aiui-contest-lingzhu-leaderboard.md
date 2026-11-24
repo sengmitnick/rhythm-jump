@@ -4,6 +4,8 @@
 > 配套技能：[rokid-lingzhu-backend](https://github.com/sengmitnick/rokid-lingzhu-backend)
 > 智能体名称：节奏开跳
 
+![灵珠当后端：给 AIUI 应用做一张跨账号排行榜](images/cover.png)
+
 做这个排行榜之前，我以为最难的是排序。
 
 结果第一版上线，两个账号各自提交成绩都成功，换台设备登录，榜单里只剩自己。查了半天 SQL，条件写得干干净净，就是没有 `user_id` 过滤。后来才发现问题根本不在查询语句，而在那张表的权限模式：平台按调用者把记录隔离了，工作流再怎么查都只看得见自己那份。
