@@ -9,7 +9,6 @@ import { ConsoleResearchLog } from '../src/lib/console-research-log.js';
 import { HeadPose } from '../src/lib/head-pose.js';
 import { createPerfMeter } from '../src/lib/perf-meter.js';
 import { FramePacer, MIN_INTERVAL_MS, shouldDrawFrame } from '../src/lib/frame-pacing.js';
-import { SensorClock } from '../src/lib/sensor-clock.js';
 import { MenuNavigation, templeKey } from '../src/lib/menu-navigation.js';
 import { tutorialSample, warmupSample } from './fixtures/motion.js';
 
@@ -84,7 +83,7 @@ function setup({logURL, request, rejectResearchStorage=false, tutorialComplete=t
   }
   const sandbox = {
     Session, ResearchLog, LanResearchLog, ConsoleResearchLog, HeadPose, createPerfMeter, MenuNavigation, templeKey, TutorialVoice,
-    FramePacer, MIN_INTERVAL_MS, shouldDrawFrame, SensorClock,
+    FramePacer, MIN_INTERVAL_MS, shouldDrawFrame,
     RhythmAudio: TestAudio, AudioContext: undefined, AudioPlayer: undefined, Accelerometer, Gyroscope, AbsoluteOrientationSensor,
     render: (_ctx, model) => rendered.push(model), SERVICE_CONFIG: {logURL, motionDiagnostics, agentId, timing}, performance: { now: () => now },
     crypto: { randomUUID: () => '00000000-0000-4000-8000-000000000001' },
@@ -100,7 +99,7 @@ function setup({logURL, request, rejectResearchStorage=false, tutorialComplete=t
     },
     console: { error: (...args) => errors.push(args.join(' ')), warn: () => {}, log: line => consoleLines.push(line) },
     setTimeout: (fn, delay=0) => { const id = nextTimer++; active.set(id, { fn, once: true, dueAt: now + delay }); return id; },
-    setInterval: fn => { const id = nextTimer++; active.set(id, { fn }); return id; },
+    setInterval: (fn, delay=0) => { const id = nextTimer++; active.set(id, { fn, delay }); return id; },
     clearTimeout: clearTimer, clearInterval: clearTimer,
   };
   if (animationFrames) {
@@ -193,10 +192,48 @@ test('display callbacks cap frame submissions and a silent host falls back to a 
   fixture.advance(400); fixture.flushTimeouts();
   assert.equal(draws, 4, 'timeout draws without waiting for the first display callback');
   assert.equal([...active.values()].some(timer => timer.animation), false);
+  assert.equal([...active.values()].find(timer => !timer.once)?.delay, 1000 / 45);
   fixture.advance(34); fixture.frame();
   assert.equal(draws, 5);
   page.onUnload();
   assert.equal(active.size, 0);
+});
+
+test('a host that stops display callbacks after the first frame also falls back', () => {
+  const fixture = setup({ animationFrames: true });
+  const { page, active } = fixture;
+  let draws = 0;
+  page._frame = () => { draws++; };
+  page.onReady(); fixture.flushTimeouts();
+  fixture.time(MIN_INTERVAL_MS); fixture.frame();
+  assert.equal(draws, 2);
+  fixture.time(400); fixture.flushTimeouts();
+  assert.equal([...active.values()].some(timer => timer.animation), true, 'watchdog waits for the last callback deadline');
+  fixture.time(400 + MIN_INTERVAL_MS); fixture.flushTimeouts();
+  assert.equal(draws, 3, 'the stalled loop draws immediately on fallback');
+  assert.equal([...active.values()].some(timer => timer.animation), false);
+  assert.equal([...active.values()].find(timer => !timer.once)?.delay, 1000 / 45);
+  fixture.advance(34); fixture.frame();
+  assert.equal(draws, 4, 'the timer loop continues after fallback');
+  page.onUnload();
+  assert.equal(active.size, 0);
+});
+
+test('blank agent IDs stay offline while a result is still saved locally', async () => {
+  for (const agentId of [undefined, '', '   ']) {
+    const requests = [];
+    const fixture = setup({ agentId, request: options => requests.push(options) });
+    const { page, storage } = fixture;
+    assert.equal(page._leaderboardClient, null);
+    await page._save({ courseId: 'beatucada', version: 1, judgements: [] }, {
+      course: { id: 'beatucada', version: 1 }, score: 1000, accuracy: 100,
+      maxCombo: 1, perfect: 1, good: 0, ok: 0, miss: 0,
+    });
+    assert.equal(storage.get('rhythm-history').length, 1);
+    assert.equal(page._session.saved, '成绩已保存在眼镜');
+    assert.deepEqual(requests, []);
+    page.onUnload();
+  }
 });
 
 test('hiding before deferred canvas initialization still initializes exactly once on show', () => {

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { renderSpatial, padScreens, noteScreen } from '../src/lib/spatial-render.js';
+import { renderSpatial, padScreens, noteScreen, displayElapsedMs } from '../src/lib/spatial-render.js';
 import { GLASSES_INK } from '../src/lib/render.js';
 import { Game, PERFECT_MS, GOOD_MS, OK_MS } from '../src/lib/game.js';
 import { getCourses, LANE_BY_ACTION } from '../src/lib/courses.js';
@@ -214,6 +214,39 @@ test('Perfect, Good, OK and Miss resolve around the judged pad with distinct loc
   assert.ok(!perfect.strokes.some(stroke => stroke.color === GLASSES_INK.bright &&
     stroke.path.some(([, x]) => x < 5 || x > 475)), 'no perimeter flash');
   assert.ok(!judge('perfect', 460).texts.includes('PERFECT'), 'feedback clears after its short lifetime');
+});
+
+test('display offset advances cue projection without changing scoring or hit-feedback time', () => {
+  const frame = model('dodge-left');
+  const [event] = frame.state.events;
+  const original = frame.state.elapsedMs;
+  const projected = displayElapsedMs(frame.state, 180);
+  assert.equal(projected, original + 180);
+  const cuePath = renderModel => {
+    const capture = nativeContext();
+    renderSpatial(capture.ctx, renderModel);
+    const cue = capture.strokes.find(stroke => stroke.width === 2.6);
+    assert.ok(cue, 'judgement-depth cue is rendered');
+    return cue.path;
+  };
+  const normalPath = cuePath(frame);
+  const offsetPath = cuePath({ ...frame, displayOffsetMs: 180 });
+  const advancedPath = cuePath({
+    ...frame, state: { ...frame.state, elapsedMs: original + 180 },
+  });
+  assert.notDeepEqual(offsetPath, normalPath, 'render offset moves the predictive cue');
+  assert.deepEqual(offsetPath, advancedPath, 'render offset matches an equally advanced visual clock');
+  assert.equal(frame.state.elapsedMs, original);
+  assert.equal(frame.state.score, 0);
+  assert.equal(frame.state.done.size, 0);
+
+  const last = { atMs: original - 300, action: event.action, lane: event.lane, grade: 'perfect', offset: null };
+  const capture = nativeContext();
+  renderSpatial(capture.ctx, {
+    ...frame, displayOffsetMs: 250,
+    state: { ...frame.state, last },
+  });
+  assert.ok(capture.texts.includes('PERFECT'), 'render lead does not make a fresh hit effect 250ms older');
 });
 
 test('consecutive notes in one lane separate the next action prompt and the last grade', () => {

@@ -1,11 +1,12 @@
 // Frame pacing for the 480x352 native stage. Ask the host for its display
 // cadence, start at 60 fps, and use sustained render cost (not a single GC
-// spike) to step down to 45 or 30 fps when the device is under load.
+// spike) to step down to 45 fps when the device is under load. Never fall back
+// to the old 30 fps cadence: that reintroduces a full 33.3 ms visual interval.
 export const TARGET_FPS = 60;
-export const MIN_FPS = 30;
+export const MIN_FPS = 45;
 export const MIN_INTERVAL_MS = 1000 / TARGET_FPS;
 export const MAX_INTERVAL_MS = 1000 / MIN_FPS;
-export const FRAME_INTERVALS_MS = Object.freeze([1000 / 60, 1000 / 45, 1000 / 30]);
+export const FRAME_INTERVALS_MS = Object.freeze([1000 / 60, 1000 / 45]);
 
 export class FramePacer {
   constructor() { this.reset(); }

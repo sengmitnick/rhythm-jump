@@ -4,18 +4,18 @@ import {
   FramePacer, FRAME_INTERVALS_MS, MIN_INTERVAL_MS, MAX_INTERVAL_MS, shouldDrawFrame,
 } from '../src/lib/frame-pacing.js';
 
-test('frame pacing starts at 60 fps and stays inside the 30 fps floor', () => {
+test('frame pacing starts at 60 fps and stays inside the 45 fps floor', () => {
   const pacer = new FramePacer();
   assert.equal(pacer.intervalMs, 1000 / 60);
   assert.equal(MIN_INTERVAL_MS, 1000 / 60);
-  assert.equal(MAX_INTERVAL_MS, 1000 / 30);
-  assert.deepEqual(FRAME_INTERVALS_MS, [1000 / 60, 1000 / 45, 1000 / 30]);
+  assert.equal(MAX_INTERVAL_MS, 1000 / 45);
+  assert.deepEqual(FRAME_INTERVALS_MS, [1000 / 60, 1000 / 45]);
 });
 
-test('sustained load steps down through 45 and 30 fps, never below it', () => {
+test('sustained load steps down to 45 fps and never below it', () => {
   const pacer = new FramePacer();
   for (let i = 0; i < 60; i++) pacer.observe(25);
-  assert.equal(pacer.intervalMs, 1000 / 30);
+  assert.equal(pacer.intervalMs, 1000 / 45);
   for (let i = 0; i < 200; i++) pacer.observe(400);
   assert.equal(pacer.intervalMs, MAX_INTERVAL_MS);
 });

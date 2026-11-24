@@ -1,10 +1,11 @@
-// Original synthesized soundtrack. The audio clock drives the game in both
-// hosts, so the music is built from the same beat grid the chart uses.
+// Recorded and synthesized soundtrack. Gameplay owns its monotonic clock; this
+// module reports native playback submission timing so Session can align chart
+// zero without letting an output clock change judgement time.
 const SCALE = [0, 3, 5, 7, 10];
 
-// Engineering starting point, not a device measurement: allow roughly three
-// 20 ms decode/output quanta plus one 60 Hz presentation interval, rounded from
-// ~77 ms. Device video/loopback evidence should tune this per host.
+// Engineering starting point, not a device measurement: four roughly 20 ms
+// native bridge/decode/mixer/output scheduling quanta. Device video or loopback
+// evidence must tune this per host; the trace records the synchronous part too.
 export const DEFAULT_AUDIO_OFFSET_MS = 80;
 const MAX_AUDIO_OFFSET_MS = 500;
 
@@ -28,8 +29,8 @@ export class RhythmAudio {
     this.trackSrc = null; this.trackLoop = false; this.trackDurationMs = 0; this.player = null;
     this.preview = null; this.playbackTiming = null;
   }
-  // A course may carry its own recording. When it does, the recording is the
-  // beat grid: the clock follows it and the chart is authored on its bars.
+  // A course may carry its own recording. Its authored bars define the beat
+  // grid, while Session keeps the chart on the shared monotonic clock.
   setCourse(course) {
     this.stopPreview();
     const src = course?.music || null;
@@ -91,7 +92,7 @@ export class RhythmAudio {
         submittedAtMs,
         commandMs: Math.max(0, submittedAtMs - requestedAtMs),
         audioOffsetMs: this.audioOffsetMs,
-        audibleAtMs: submittedAtMs + this.audioOffsetMs,
+        estimatedAudibleAtMs: submittedAtMs + this.audioOffsetMs,
         positionMs: Math.max(0, seekMs),
       };
       pending?.catch?.(() => this.stopMusic(player));

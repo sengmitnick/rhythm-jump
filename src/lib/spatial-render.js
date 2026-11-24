@@ -308,6 +308,12 @@ export function noteScreen(event, elapsedMs, pose = null) {
   return projectWorld(notePosition(event.lane, event.atMs - elapsedMs), createStageCamera(pose));
 }
 
+export function displayElapsedMs(state, offsetMs = 0) {
+  const elapsed = Number.isFinite(state?.elapsedMs) ? state.elapsedMs : 0;
+  const offset = Number.isFinite(offsetMs) ? Math.max(-250, Math.min(250, offsetMs)) : 0;
+  return Math.max(0, Math.min(state?.course?.durationMs ?? Infinity, elapsed + offset));
+}
+
 function note(c, event, delta, camera, focused) {
   const [x, y, z] = notePosition(event.lane, delta);
   const point = projectWorld([x, y, z], camera);
@@ -960,10 +966,10 @@ export function renderSpatial(c, model = {}) {
     if (model.perf?.text) text(c, model.perf.text, 240, 246, 8, C.secondary, 'center');
   } else if (state) {
     const t = state.elapsedMs, bpm = state.course?.bpm || 108;
-    const offset = Number.isFinite(model.displayOffsetMs) ? Math.max(-250, Math.min(250, model.displayOffsetMs)) : 0;
-    // Advance only predictive visuals. Judgement, score, HUD progress and the
-    // age of an already-triggered hit stay on the real chart clock.
-    const visualT = Math.max(0, Math.min(state.course?.durationMs ?? Infinity, t + offset));
+    // Display calibration advances only predictive visuals. It is not an
+    // intentional delay or a way to fake better timing: judgement, score, HUD
+    // progress and the age of an already-triggered hit use the real chart clock.
+    const visualT = displayElapsedMs(state, model.displayOffsetMs);
     const camera = createStageCamera(model.pose);
     stage(c, state, visualT, bpm, camera, model.body);
     feedback(c, state, t, camera);

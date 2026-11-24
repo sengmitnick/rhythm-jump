@@ -115,7 +115,9 @@ export class Session {
     this._beginCalibration(now, source === 'imu' && this.calibrationReady && this.body.worldRight);
     this._tracedJudgements = 0; this._traceOpen = source === 'imu' && typeof this.onTrace === 'function';
     this.trace('start', { courseId: course.id, chartVersion: course.version, bpm: course.bpm, durationMs: course.durationMs,
-      timing: { version: TIMING_VERSION, perfectMs: PERFECT_MS, goodMs: GOOD_MS, okMs: OK_MS }, body: { ...this.body.options }, events: course.events });
+      timing: { version: TIMING_VERSION, perfectMs: PERFECT_MS, goodMs: GOOD_MS, okMs: OK_MS,
+        audioOffsetMs: this.audio?.audioOffsetMs ?? 0, displayOffsetMs: this.displayOffsetMs },
+      body: { ...this.body.options }, events: course.events });
   }
 
   _beginCalibration(now, checkReference) {
@@ -205,10 +207,7 @@ export class Session {
   // One sensor reading: { accel } and/or { pose }. Either may be missing; the
   // posture estimate keeps whatever it last knew.
   sample(reading = {}) {
-    const arrivalNow = this.clock();
-    // SensorClock maps the host timestamp onto the same monotonic clock. Use
-    // arrival time for liveness and the capture time for motion/judgement.
-    const now = Number.isFinite(reading.clockMs) ? Math.min(arrivalNow, reading.clockMs) : arrivalNow;
+    const now = this.clock();
     // Adapters may hand in a bare accelerometer reading; normalise it.
     if (!reading.accel && [reading.x, reading.y, reading.z].every(Number.isFinite)) {
       reading = { accel: reading };
@@ -216,39 +215,37 @@ export class Session {
     if (reading.accel) {
       const { x, y, z, sensorTimestamp } = reading.accel;
       const valid = [x, y, z].every(Number.isFinite);
-      if (this._traceOpen && arrivalNow - (this._lastImuTrace ?? -Infinity) >= this.rawTraceIntervalMs) {
-        this._lastImuTrace = arrivalNow;
+      if (this._traceOpen && now - (this._lastImuTrace ?? -Infinity) >= this.rawTraceIntervalMs) {
+        this._lastImuTrace = now;
         this.trace('imu', {
           sensor: 'accelerometer', axes: [x, y, z], sensorTimestamp: sensorTimestamp ?? null, valid,
-          sampleClockMs: now, inputDelayMs: Math.max(0, arrivalNow - now),
-          timestampSource: reading.timestampSource ?? 'arrival',
           quaternion: reading.quaternion ?? null,
           orientationAgeMs: Number.isFinite(reading.orientationAgeMs) ? reading.orientationAgeMs : null,
-        }, arrivalNow);
+        }, now);
       }
       if (!valid) return this.lastState;
-      this.lastSample = arrivalNow;
+      this.lastSample = now;
       if (this.source === 'imu') {
         const checking = this.mode === 'calibrating';
         const quaternion = checking ? normalizeQuaternion(reading.quaternion) : reading.quaternion;
-        this._checkImuContinuity(arrivalNow);
+        this._checkImuContinuity(now);
         const timestamp = Number.isFinite(sensorTimestamp) ? sensorTimestamp : null;
         if (quaternion && (timestamp === null || timestamp !== this._lastPairSensorTimestamp)) {
-          this._lastPairAt = arrivalNow;
+          this._lastPairAt = now;
           this._lastPairSensorTimestamp = timestamp;
           if (checking) {
             this._lastQuat = quaternion;
-            this._sampleNeutral({ x, y, z }, quaternion, arrivalNow);
+            this._sampleNeutral({ x, y, z }, quaternion, now);
           }
         }
       }
     }
-    if (this._traceOpen && reading.pose && arrivalNow - (this._lastPoseTrace ?? -Infinity) >= Math.max(200, this.rawTraceIntervalMs)) {
-      this._lastPoseTrace = arrivalNow;
+    if (this._traceOpen && reading.pose && now - (this._lastPoseTrace ?? -Infinity) >= Math.max(200, this.rawTraceIntervalMs)) {
+      this._lastPoseTrace = now;
       this.trace('pose', {
         yaw: reading.pose.yaw ?? null, pitch: reading.pose.pitch ?? null,
         roll: reading.pose.roll ?? null, valid: reading.pose.valid !== false,
-      }, arrivalNow);
+      }, now);
     }
     const priorJump = this.body.lastJump;
     this.lastState = this.body.sample(reading, now);
@@ -370,8 +367,8 @@ export class Session {
     if (this.tutorial) this.audio?.stopMusic?.();
     else audioStart = this.audio?.startMusic?.(0) ?? null;
     const submittedAt = this.clock();
-    const chartOrigin = Number.isFinite(audioStart?.audibleAtMs)
-      ? Math.max(submittedAt, audioStart.audibleAtMs) : submittedAt;
+    const chartOrigin = Number.isFinite(audioStart?.estimatedAudibleAtMs)
+      ? Math.max(submittedAt, audioStart.estimatedAudibleAtMs) : submittedAt;
     this.game.start(submittedAt, chartOrigin - submittedAt);
     this.trace('state', { state: this.mode, posture: this.lastState, chartOriginMs: chartOrigin, audioStart }, submittedAt);
   }
@@ -499,8 +496,8 @@ export class Session {
         this.audio?.stopMusic?.();
       } else audioStart = this.audio?.startMusic?.(pausedElapsedMs) ?? null;
       const submittedAt = this.clock();
-      const resumeAt = Number.isFinite(audioStart?.audibleAtMs)
-        ? Math.max(submittedAt, audioStart.audibleAtMs) : submittedAt;
+      const resumeAt = Number.isFinite(audioStart?.estimatedAudibleAtMs)
+        ? Math.max(submittedAt, audioStart.estimatedAudibleAtMs) : submittedAt;
       this.game.resume(submittedAt, resumeAt - submittedAt);
       this.trace('state', { state: 'resumed', resumeAtMs: resumeAt, audioStart }, submittedAt);
       this.audio && (this.audio.lastBeat = -1);

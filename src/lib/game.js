@@ -22,28 +22,35 @@ export class Game {
     this.course = course; this.status = 'ready'; this.elapsedMs = 0; this.origin = 0;
     this.judgements = []; this.done = new Set(); this.last = null; this.recent = [];
     this._usedMovement = new Map();
-    this.energy = 0; this.startedAt = null; this.holdStartedAt = 0; this.holdUntil = 0;
+    this.energy = 0; this.startedAt = null; this.holdUntil = 0;
+    this.inputNotBefore = -Infinity;
     this._totals = { score: 0, combo: 0, maxCombo: 0, perfect: 0, good: 0, ok: 0, miss: 0 };
   }
   start(now, delayMs = 0) {
     if (this.status === 'ready') {
       const delay = Number.isFinite(delayMs) ? Math.max(0, delayMs) : 0;
-      this.status = 'playing'; this.holdStartedAt = now; this.holdUntil = now + delay;
+      this.status = 'playing'; this.holdUntil = now + delay;
+      this.inputNotBefore = delay > 0 ? this.holdUntil : -Infinity;
       this.origin = this.holdUntil; this.startedAt = this.origin; this.lastTickAt = this.holdUntil;
     }
   }
   time(now) {
     if (this.status !== 'playing') return this.elapsedMs;
-    // Actual clock reads freeze during output warm-up. Older movement timestamps
-    // still map normally, which preserves replay/adapter semantics across pause.
-    if (now >= this.holdStartedAt && now < this.holdUntil) return this.elapsedMs;
-    return Math.min(this.course.durationMs, Math.max(0, now - this.origin));
+    // A queued callback can carry a timestamp from just before resume. The
+    // public playhead never rewinds below its frozen value.
+    return Math.min(this.course.durationMs, Math.max(this.elapsedMs, now - this.origin));
   }
-  pause(now) { if (this.status === 'playing') { this.elapsedMs = this.time(now); this.status = 'paused'; } }
+  movementTime(now) { return Math.min(this.course.durationMs, Math.max(0, now - this.origin)); }
+  pause(now) {
+    if (this.status === 'playing') {
+      this.elapsedMs = this.time(now); this.status = 'paused';
+    }
+  }
   resume(now, delayMs = 0) {
     if (this.status === 'paused') {
       const delay = Number.isFinite(delayMs) ? Math.max(0, delayMs) : 0;
-      this.holdStartedAt = now; this.holdUntil = now + delay;
+      this.holdUntil = now + delay;
+      this.inputNotBefore = delay > 0 ? this.holdUntil : -Infinity;
       this.origin = this.holdUntil - this.elapsedMs; this.lastTickAt = this.holdUntil;
       this.status = 'playing';
     }
@@ -63,6 +70,7 @@ export class Game {
   // posture: { action, since } with `since` on the same clock as `now`.
   sync(body, now) {
     if (this.status !== 'playing' || !Number.isFinite(now)) return null;
+    if (now < this.holdUntil) return null;
     const t = this.time(now), timed = typeof body?.sinceFor === 'function';
     let nearest = null;
     for (const event of this.course.events) {
@@ -74,8 +82,9 @@ export class Game {
         : body.action === event.action);
       if (!matches) continue;
       const raw = timed ? body.sinceFor(event.action) : body.since;
+      if (timed && Number.isFinite(raw) && raw < this.inputNotBefore) continue;
       if (timed && Number.isFinite(raw) && this._usedMovement.get(event.action) === raw) continue;
-      const at = Number.isFinite(raw) ? this.time(raw) : t;
+      const at = Number.isFinite(raw) ? this.movementTime(raw) : t;
       const delta = Math.round(at - event.atMs);
       // Keep explicit held-posture adapters working. Real sensor inputs are
       // graded by the movement timestamp and spent on the closest eligible cue.
@@ -129,6 +138,7 @@ export class Game {
 
   tick(now) {
     if (this.status !== 'playing' || !Number.isFinite(now)) return;
+    if (now < this.holdUntil) return;
     const t = this.time(now);
     for (const e of this.course.events) {
       if (!this.done.has(e.id) && (t > e.atMs + EXPIRE_MS || t >= this.course.durationMs)) this.judge(e, 'miss', null, t);
