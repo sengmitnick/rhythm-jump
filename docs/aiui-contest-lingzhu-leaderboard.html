@@ -73,7 +73,7 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
     <a class="lv2" href="#先想清楚接口">先想清楚接口</a>
     <a class="lv2" href="#两张表">两张表</a>
     <a class="lv2" href="#工作流怎么排">工作流怎么排</a>
-    <a class="lv2" href="#不拖拽-用技能把工作流设计出来">不拖拽，用技能把工作流设计出来</a>
+    <a class="lv2" href="#不拖拽-让-agent-读画布-把工作流生成出来">不拖拽：让 agent 读画布，把工作流生成出来</a>
     <a class="lv2" href="#代码-a-到底拦了什么">代码 A 到底拦了什么</a>
     <a class="lv2" href="#回包是流-不是-json">回包是流，不是 JSON</a>
     <a class="lv2" href="#那个-rw-mode">那个 <code>rw_mode</code></a>
@@ -127,10 +127,11 @@ rhythm_score   run_id, user_id, display_name, song_id, song_title,
 <p>数据节点尽量笨。它只按字段写、按 <code>song_id + chart_version</code> 查最近 100 行。之前试过在节点里写判断，结果改一次业务就要重连一次工作流，很烦。</p>
 <p>代码 B 负责榜单：按 <code>user_id</code> 去重取最高分，同分按 <code>played_at</code> 升序，截断到 <code>limit</code>，再算本人名次。本人掉出前几名时单独返回一条，界面上就是那句"你 · 第 11 名"。</p>
 <p>汇总节点只取第一个非空的 <code>response_json</code>，因为三个分支同时只会走通一条。</p>
-<h2 id="不拖拽-用技能把工作流设计出来">不拖拽，用技能把工作流设计出来</h2>
-<p>上面这套东西，第一版是我在灵珠后台一个节点一个节点拖出来的。</p>
-<p>拖拽本身不难，难的是那些看不见的东西：选择器的第二个条件端口叫 <code>true_1</code> 而不是 <code>true</code>；新增节点的字段框要填 <code>fieldID</code>，查询条件要填字段名，两个不是一回事；代码节点的 <code>inputs.language</code> 得是数字 <code>3</code>，写成 <code>0</code> 能保存但打不开。这些没人写在文档里，全靠报错和猜。</p>
-<p>后来我把这套过程整理成了一个 Codex 技能：rokid-lingzhu-backend。它不是文档，是一份能让 agent 照着干活的规程。</p>
+<h2 id="不拖拽-让-agent-读画布-把工作流生成出来">不拖拽：让 agent 读画布，把工作流生成出来</h2>
+<p>这套东西没有先在灵珠后台拖一遍。第一版是在 DSH（DeepSeek Harness，一个能读写文件、也能直接调平台的 agent 环境）里落实的：我把需求、表结构和验收标准说清楚，剩下的交给模型。</p>
+<p>灵珠的画布本身就是一份数据。保存草稿时，节点和连线被序列化进 <code>schema</code>，连同 <code>submit_commit_id</code> 一起提交。节点类型、端口名（第一个条件是 <code>true</code>，第二个是 <code>true_1</code>）、数据节点绑定的 <code>fieldID</code>、代码节点的 <code>inputs.language</code>，全在这份数据里。</p>
+<p>所以一开始就是让模型去拿这份数据：读现有草稿的保存请求、读目标表的字段配置，把 schema 和字段 ID 摸清楚，再按同一套结构生成新链路。人只在一种情况下介入——某个节点类型在现有样本里从来没出现过，没有结构可参考，那就手建一个最小样本给它看。样本到手，后面还是模型生成。</p>
+<p>这些约定靠人在画布上试，就是保存、打不开、再猜；写在 schema 里反而一目了然，只是没人想到去翻。等这条链路跑通、坑也踩过一遍，我才把整个过程整理成 Codex 技能分享出来。</p>
 <p>结构很小：一个 SKILL.md 说明什么情况下该用它，四篇参考（建表接线 / AIUI 回包 / 共享表权限 / 两个项目的案例史），一个 Python 脚本（生成表权限更新正文、比对修改前后的回读结果）。</p>
 <p>装好之后（Codex 里是这样，Claude Code 这类支持 skill 的 agent 同理），直接说需求：</p>
 <blockquote><p>给一个按关卡分的排行榜做后端，玩家提交成绩，每人取最高分，同分先达成者在前，要能跨账号看。</p></blockquote>
@@ -139,10 +140,10 @@ rhythm_score   run_id, user_id, display_name, song_id, song_title,
 <p>比如它给出的绑定表，比对着画布一个个点开看要快得多：</p>
 <div class="table-wrap"><table><thead><tr><th>节点</th><th>输入</th><th>从哪来</th></tr></thead><tbody><tr><td>代码 A</td><td><code>input</code></td><td>开始 · USER_INPUT</td></tr><tr><td>新增成绩</td><td>14 个 fieldID</td><td>代码 A 的各输出字段</td></tr><tr><td>查询排行榜</td><td><code>song_id</code> / <code>chart_version</code></td><td>代码 A 的输出；节点返回最近 100 行</td></tr><tr><td>包装 榜单</td><td><code>payload_json</code> / <code>rows</code></td><td>代码 A · payload_json / 查询排行榜 · outputList</td></tr><tr><td>汇总</td><td><code>r0</code> / <code>r1</code> / <code>r2</code></td><td>三个包装节点的 response_json</td></tr></tbody></table></div>
 <p>表格里 <code>rows</code> 这类输入名、<code>outputList</code> 这类输出名、以及选择器端口为什么是 <code>true_1</code>，都是踩过才写进去的。这也是我把它做成技能、而不是只写一份文档的原因：文档读一遍就忘，技能会在每次动手时把清单摊在你面前。</p>
-<p>拿到这些，落地其实很机械：代码节点的 Python 整段贴进编辑器，连线照绑定表点，测试用例逐条跑。真正省掉的不是"写代码"，是对字段、对端口、对变量名这三件纯机械又特别容易错的事。</p>
-<p>如果画布本身也想生成，技能里也写了路径：把 <code>{nodes,edges}</code> 序列化进保存请求的 <code>schema</code>，带上 <code>submit_commit_id</code>。但这条路要先备份当前草稿，并且用当前编辑器版本手建一个小样核对 schema、端口名和字段类型——平台改版后这些都会变，照旧样本生成会得到一个能保存却打不开的工作流。</p>
-<p>有两件事它替不了：</p>
-<ul><li>点"发布"。工作流版本和外层智能体的发布状态是两个东西，得自己核对；</li><li>登进去改权限。表权限必须用你自己的登录会话操作，技能只把更新正文和回读比对准备好，改完还得用两个真实账号去看榜。</li></ul>
+<p>拿到这些，剩下的主要是核对和验证：把生成结果写进草稿，逐个节点点测试，再整图跑一遍已知记录。真正省掉的不是"写代码"，是对字段、对端口、对变量名这三件纯机械又特别容易错的事。</p>
+<p>画布怎么生成，技能里写得很具体：先备份当前草稿；用当前编辑器版本的小样核对 schema、字段 ID、端口和版本；如果草稿在备份之后被别人改过，要重新读取再合并，别覆盖人家的接线。平台改版后节点结构会变，照旧样本生成会得到一个能保存却打不开的工作流，所以每换一个平台版本，先拿最小样本对一遍，再批量生成。</p>
+<p>有三件事它替不了：</p>
+<ul><li>第一次遇到某个节点类型时手建的最小样本。平台不会凭空给出结构，得有人点一个出来；</li><li>点"发布"。工作流版本和外层智能体的发布状态是两个东西，得自己核对；</li><li>登进去改权限。表权限必须用你自己的登录会话操作，技能只把更新正文和回读比对准备好，改完还得用两个真实账号去看榜。</li></ul>
 <p>技能里还有一条我觉得最值钱的经验：<strong>先读一条已知记录，再动写分支。</strong> 用一个确定存在的业务 ID 发一次只读请求，断言返回的具体值；再换一个不存在的 ID，断言拿到空结果。正反两次一起测，"每次都返回空"这类接线错误当场就露出来。这条现在是我所有后端调试的第一步。</p>
 <p>安装一行（Codex 默认从 <code>~/.codex/skills</code> 加载）：</p>
 <pre class="code lang-sh"><code>git clone https://github.com/sengmitnick/rokid-lingzhu-backend.git ~/.codex/skills/rokid-lingzhu-backend</code></pre>
