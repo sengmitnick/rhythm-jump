@@ -92,7 +92,15 @@ docs/                 征文、排行榜经验与界面材料
 - [AIUI 征文：用灵珠工作流做 AIUI 后端（跨账号共享排行榜）](docs/aiui-contest-lingzhu-leaderboard.md)（[网页版](docs/aiui-contest-lingzhu-leaderboard.html)，`npm run docs:html` 重新生成）
 - [公开快照验证记录](docs/validation.md)
 - [灵珠排行榜接入](backend/v1/README.md)
-- 配套技能：[rokid-lingzhu-backend](https://github.com/sengmitnick/rokid-lingzhu-backend) —— 把灵珠后端接线、流式回包排障和跨账号共享榜单整理成了可直接调用的 Codex skill
+## 配套技能：不拖拽也能搭后端
+
+灵珠后台的可视化编排要一个节点一个节点拖，字段 ID、条件端口名、代码节点语言标记这些细节只能靠试。仓库配套的 [rokid-lingzhu-backend](https://github.com/sengmitnick/rokid-lingzhu-backend) 把这两个项目的搭建过程整理成了 Codex 技能：描述业务后，agent 按规程产出协议、表结构、画布骨架、三个代码节点的 Python、节点绑定表和测试用例，再落地到工作流里。
+
+```sh
+git clone https://github.com/sengmitnick/rokid-lingzhu-backend.git ~/.codex/skills/rokid-lingzhu-backend
+```
+
+装好后在对话里用 `$rokid-lingzhu-backend` 指定。技能的边界：它不替你点"发布"，也不替你登录改表权限。
 - [共享排行榜 rw_mode 设置与跨账号验收](docs/lingzhu-leaderboard-rw-mode.md)
 - [第三方素材与许可](THIRD_PARTY_NOTICES.md)
 
