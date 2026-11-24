@@ -132,10 +132,13 @@ rhythm_score   run_id, user_id, display_name, song_id, song_title,
 <p>拖拽本身不难，难的是那些看不见的东西：选择器的第二个条件端口叫 <code>true_1</code> 而不是 <code>true</code>；新增节点的字段框要填 <code>fieldID</code>，查询条件要填字段名，两个不是一回事；代码节点的 <code>inputs.language</code> 得是数字 <code>3</code>，写成 <code>0</code> 能保存但打不开。这些没人写在文档里，全靠报错和猜。</p>
 <p>后来我把这套过程整理成了一个 Codex 技能：rokid-lingzhu-backend。它不是文档，是一份能让 agent 照着干活的规程。</p>
 <p>结构很小：一个 SKILL.md 说明什么情况下该用它，四篇参考（建表接线 / AIUI 回包 / 共享表权限 / 两个项目的案例史），一个 Python 脚本（生成表权限更新正文、比对修改前后的回读结果）。</p>
-<p>用起来是这样。装好之后直接说需求：</p>
+<p>装好之后（Codex 里是这样，Claude Code 这类支持 skill 的 agent 同理），直接说需求：</p>
 <blockquote><p>给一个按关卡分的排行榜做后端，玩家提交成绩，每人取最高分，同分先达成者在前，要能跨账号看。</p></blockquote>
 <p>它会先确认几件事（哪个空间、哪张表、外层智能体、用什么账号验收），然后按规程产出：</p>
 <ul><li>请求/响应协议，包括版本号、<code>request_id</code>、<code>ok/error</code> 结构和错误码；</li><li>两张表的字段清单，标出哪些是平台系统字段、哪些要自己加；</li><li>画布骨架：分发 → 选择器 → 数据节点 → 包装 → 汇总，以及每条边该连到哪；</li><li>三个代码节点的完整 Python，包括 <code>async def main(args)</code> 的入参取法和输出键名；</li><li>每个数据节点的绑定表：条件字段填字段名，写入字段填 <code>fieldID</code>；</li><li>一组测试用例：已知记录、不存在的 ID、未知 op、重复提交；</li><li>改表权限的更新正文，以及改完之后回读比对的命令。</li></ul>
+<p>比如它给出的绑定表，比对着画布一个个点开看要快得多：</p>
+<div class="table-wrap"><table><thead><tr><th>节点</th><th>输入</th><th>从哪来</th></tr></thead><tbody><tr><td>代码 A</td><td><code>input</code></td><td>开始 · USER_INPUT</td></tr><tr><td>新增成绩</td><td>14 个 fieldID</td><td>代码 A 的各输出字段</td></tr><tr><td>查询排行榜</td><td><code>song_id</code> / <code>chart_version</code></td><td>代码 A 的输出；节点返回最近 100 行</td></tr><tr><td>包装 榜单</td><td><code>payload_json</code> / <code>rows</code></td><td>代码 A · payload_json / 查询排行榜 · outputList</td></tr><tr><td>汇总</td><td><code>r0</code> / <code>r1</code> / <code>r2</code></td><td>三个包装节点的 response_json</td></tr></tbody></table></div>
+<p>表格里 <code>rows</code> 这类输入名、<code>outputList</code> 这类输出名、以及选择器端口为什么是 <code>true_1</code>，都是踩过才写进去的。这也是我把它做成技能、而不是只写一份文档的原因：文档读一遍就忘，技能会在每次动手时把清单摊在你面前。</p>
 <p>拿到这些，落地其实很机械：代码节点的 Python 整段贴进编辑器，连线照绑定表点，测试用例逐条跑。真正省掉的不是"写代码"，是对字段、对端口、对变量名这三件纯机械又特别容易错的事。</p>
 <p>如果画布本身也想生成，技能里也写了路径：把 <code>{nodes,edges}</code> 序列化进保存请求的 <code>schema</code>，带上 <code>submit_commit_id</code>。但这条路要先备份当前草稿，并且用当前编辑器版本手建一个小样核对 schema、端口名和字段类型——平台改版后这些都会变，照旧样本生成会得到一个能保存却打不开的工作流。</p>
 <p>有两件事它替不了：</p>
